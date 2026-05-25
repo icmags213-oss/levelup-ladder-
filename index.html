@@ -4,6 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>LevelUp Pickleball Ladder</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#5bb949" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="LevelUp" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+<link rel="apple-touch-icon" href="icon-192.png" />
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -741,7 +749,7 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
     </div>
     <div class="card save-box">
       <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">🔒 Lock app</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Re-lock the app with the passcode. You'll need the passcode to unlock it again.</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">App auto-locks every day at <strong>4:00 AM</strong>. You can also lock it manually here.</p>
       <div class="btn-row" style="margin-top:0;">
         <button class="btn" onclick="lockApp()">🔒 Lock now</button>
       </div>
@@ -768,9 +776,28 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
 <script>
 /* ====== Passcode lock ====== */
 const PASSCODE='24681';
-const PASSCODE_KEY='levelup-unlocked-v1';
+const PASSCODE_KEY='levelup-unlocked-v2';
+function getLast4amBoundary(){
+  // Returns the most recent 4 AM timestamp (today's 4 AM if past 4 AM, yesterday's 4 AM if before)
+  const now=new Date();
+  const today4am=new Date(now.getFullYear(),now.getMonth(),now.getDate(),4,0,0,0);
+  if(now.getTime()>=today4am.getTime()){
+    return today4am.getTime();
+  } else {
+    // Before 4 AM — use yesterday's 4 AM
+    const yesterday4am=new Date(today4am.getTime()-24*60*60*1000);
+    return yesterday4am.getTime();
+  }
+}
 function isUnlocked(){
-  try{return localStorage.getItem(PASSCODE_KEY)==='yes';}catch(e){return false;}
+  try{
+    const stored=localStorage.getItem(PASSCODE_KEY);
+    if(!stored)return false;
+    const unlockedAt=parseInt(stored,10);
+    if(isNaN(unlockedAt))return false;
+    // Unlocked is valid only if it happened AFTER the most recent 4 AM
+    return unlockedAt>=getLast4amBoundary();
+  }catch(e){return false;}
 }
 function showPasscodeLock(){
   document.getElementById('passcode-lock').style.display='flex';
@@ -788,7 +815,7 @@ function checkPasscode(){
   if(!inp)return;
   const entered=inp.value.trim();
   if(entered===PASSCODE){
-    try{localStorage.setItem(PASSCODE_KEY,'yes');}catch(e){}
+    try{localStorage.setItem(PASSCODE_KEY,String(Date.now()));}catch(e){}
     msg.style.color='#0e5a18';
     msg.textContent='✓ Unlocked';
     setTimeout(()=>hidePasscodeLock(),300);
@@ -812,6 +839,12 @@ function lockApp(){
 if(!isUnlocked()){
   showPasscodeLock();
 }
+// Check every minute if 4 AM has passed (re-locks the app while it's open)
+setInterval(()=>{
+  if(!isUnlocked()&&document.getElementById('passcode-lock').style.display!=='flex'){
+    showPasscodeLock();
+  }
+},60000);
 
 /* ====== Theme ====== */
 function setTheme(mode){
