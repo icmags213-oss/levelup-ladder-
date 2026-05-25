@@ -675,6 +675,18 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
         <button class="btn btn-primary" onclick="triggerInstall()">📲 Install app</button>
       </div>
     </div>
+    <div class="card save-box" style="border:2px solid #FFC72C;background:linear-gradient(180deg,#fffaf0 0%,#fff 100%);">
+      <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">☁️ Cloud sync (for co-coordinators)</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Share ladder data between coordinators using your GitHub repo. After a session, generate <code>data.json</code> and upload it to GitHub. Other coordinators can then pull the latest data.</p>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-primary" onclick="downloadCloudData()">☁️ Generate data.json (after session)</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" onclick="loadFromCloud()">⬇️ Load from cloud (before session)</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:10px;"><strong>Workflow:</strong> 1) Tap "Generate data.json" → file downloads. 2) Upload it to your GitHub repo (replace existing <code>data.json</code>). 3) Other coordinator taps "Load from cloud" before their next session.</p>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:6px;"><strong>⚠️ Note:</strong> "Load from cloud" replaces your current data. Make a local backup first if unsure.</p>
+    </div>
     <div class="card save-box">
       <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">📤 Publish public standings</h3>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Generate a standalone <code>standings.html</code> file you can upload to GitHub Pages. Players can view the ladders and their own stats — read-only.</p>
@@ -712,6 +724,21 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
         <button class="btn" onclick="loadBackup()">✓ Load from code</button>
       </div>
       <div id="load-msg" style="font-size:12px;margin-top:10px;display:none;"></div>
+    </div>
+    <div class="card save-box" style="border:2px solid #d9534f;background:linear-gradient(180deg,#fff5f5 0%,#fff 100%);">
+      <h3 style="font-size:14px;font-weight:700;color:#a02622;margin-bottom:8px;">⚠️ Danger zone — Reset ladder</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Start fresh by clearing data. <strong>Make a backup first</strong> — these actions cannot be undone.</p>
+      <div class="btn-row" style="margin-top:0;margin-bottom:8px;">
+        <button class="btn" onclick="downloadBackup()" style="background:#fff;border:1px solid #d9534f;color:#a02622;">💾 Backup first (recommended)</button>
+      </div>
+      <div class="btn-row" style="margin-top:0;margin-bottom:6px;">
+        <button class="btn" onclick="resetPointsOnly()" style="background:#fff3cd;border:1px solid #d9a521;color:#7a5800;">🔄 Reset points only (keep players)</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 6px;">Keeps all player names but resets points to 0 and clears history. Good for new season.</p>
+      <div class="btn-row" style="margin-top:0;margin-bottom:6px;">
+        <button class="btn" onclick="resetEverything()" style="background:#d9534f;border:1px solid #a02622;color:#fff;">🗑️ Delete EVERYTHING (start over)</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin:0 0 0 6px;">Removes all players, points, history, and sessions. Settings stay.</p>
     </div>
   </div>
 
@@ -3126,12 +3153,108 @@ function downloadBackup(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
   markBackupTaken();
 }
+
+/* ====== Cloud sync (GitHub) ====== */
+const CLOUD_DATA_URL='https://icmags213-oss.github.io/levelup-ladder-/data.json';
+function downloadCloudData(){
+  const json=backupPayload();
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='data.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  markBackupTaken();
+  setTimeout(()=>{
+    alert('✅ data.json downloaded!\n\nNext steps:\n1. Open your GitHub repo\n2. Tap "Add file" → "Upload files"\n3. Upload data.json (replace if it exists)\n4. Commit changes\n\nOther coordinators can then tap "Load from cloud" to get this data.');
+  },300);
+}
+async function loadFromCloud(){
+  if(!confirm('⚠️ Load from cloud?\n\nThis will REPLACE all current data (players, ladder, history) with the latest from GitHub.\n\nYour current data will be lost unless you backed it up.\n\nContinue?')){
+    return;
+  }
+  try{
+    const cacheBust='?t='+Date.now();
+    const resp=await fetch(CLOUD_DATA_URL+cacheBust,{cache:'no-store'});
+    if(!resp.ok){
+      if(resp.status===404){
+        alert('❌ No cloud data found.\n\nNo data.json file exists on GitHub yet. A coordinator needs to first tap "Generate data.json" and upload it to the repo.');
+      } else {
+        alert('❌ Could not load from cloud.\n\nServer returned: '+resp.status+'\n\nCheck your internet connection and try again.');
+      }
+      return;
+    }
+    const text=await resp.text();
+    let parsed;
+    try{parsed=JSON.parse(text);}catch(e){
+      alert('❌ Cloud data is corrupted.\n\nThe data.json file on GitHub is not valid. A coordinator needs to regenerate and re-upload it.');
+      return;
+    }
+    if(!parsed.S||!parsed.S.players){
+      alert('❌ Cloud data missing players.\n\nThe data.json file does not contain valid ladder data.');
+      return;
+    }
+    // Apply the data
+    S=parsed.S;
+    sess=parsed.sess||sess;
+    save();
+    renderAll();
+    alert('✅ Cloud data loaded!\n\n'+(S.players?S.players.length:0)+' players restored.\n\nPlayers, ladder rankings, and history are now in sync with GitHub.');
+  }catch(err){
+    alert('❌ Error loading from cloud:\n\n'+err.message+'\n\nCheck your internet connection.');
+  }
+}
 function emailBackup(){
   const code=btoa(unescape(encodeURIComponent(JSON.stringify({S,sess}))));
   const subject=encodeURIComponent('LevelUp Pickleball Ladder backup — '+new Date().toLocaleDateString());
   const body=encodeURIComponent('Paste this code into the Backup tab to restore:\n\n'+code);
   window.location.href=`mailto:?subject=${subject}&body=${body}`;
   markBackupTaken();
+}
+
+/* ====== Reset functions ====== */
+function resetPointsOnly(){
+  const playerCount=S.players?S.players.length:0;
+  if(playerCount===0){
+    alert('No players to reset.');
+    return;
+  }
+  if(!confirm('🔄 Reset all points to 0?\n\nThis will:\n• Keep all '+playerCount+' player names\n• Set everyone\'s points to 0\n• Clear all session history\n• Keep your settings\n\nThis cannot be undone. Continue?')){
+    return;
+  }
+  const typed=prompt('Type RESET to confirm (all caps):');
+  if(typed!=='RESET'){
+    alert('Reset cancelled.');
+    return;
+  }
+  // Reset points and clear history
+  S.players.forEach(p=>{p.pts=0;});
+  S.log=[];
+  // Reset session state
+  sess={phase:0,day:'wed',weekIdx:0,sessionLevel:'upper',present:[],courtSizes:[],rotationCount:0,dropouts:[],fillIns:[],r1courts:[],r2courts:[],r1g:{},r1p:{},r1c:{},r2g:{},r2p:{},r2c:{},lastSummary:null,courtNames:[],pickerSearch:'',pickerExpanded:false,swapping:null,addingTo:null,editingCourt:null,r2courtsManual:false,scoresheet:null};
+  save();
+  renderAll();
+  alert('✅ Points reset!\n\n'+playerCount+' players kept with 0 points. History cleared.');
+}
+function resetEverything(){
+  if(!confirm('🗑️ DELETE EVERYTHING?\n\nThis will permanently delete:\n• All players\n• All points and rankings\n• All session history\n• All current session progress\n\nSettings (point values, court tiers) will be kept.\n\nThis cannot be undone. Are you absolutely sure?')){
+    return;
+  }
+  const typed=prompt('Type DELETE to confirm (all caps):');
+  if(typed!=='DELETE'){
+    alert('Delete cancelled.');
+    return;
+  }
+  // Wipe players, log, and session — keep settings
+  S.players=[];
+  S.log=[];
+  sess={phase:0,day:'wed',weekIdx:0,sessionLevel:'upper',present:[],courtSizes:[],rotationCount:0,dropouts:[],fillIns:[],r1courts:[],r2courts:[],r1g:{},r1p:{},r1c:{},r2g:{},r2p:{},r2c:{},lastSummary:null,courtNames:[],pickerSearch:'',pickerExpanded:false,swapping:null,addingTo:null,editingCourt:null,r2courtsManual:false,scoresheet:null};
+  save();
+  renderAll();
+  alert('✅ Everything deleted!\n\nThe ladder is now empty. You can start adding players in the Players tab.');
 }
 function uploadBackupFile(input){
   const file=input.files&&input.files[0];
