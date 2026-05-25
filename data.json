@@ -1,0 +1,570 @@
+{
+  "S": {
+    "players": [
+      {
+        "name": "Tim Ishida",
+        "pts": 641,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Nancy Hauan",
+        "pts": 640,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Dewey Humes",
+        "pts": 478,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Michael Wertz",
+        "pts": 350,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Dave Liguori",
+        "pts": 349,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Mark Zaccaria",
+        "pts": 584,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Sami Amjad",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Bob Meyer",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Jeff Shelton",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Stephen Hnat",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Antony Sebastian",
+        "pts": 9.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Karissa Kutcher",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Paul Carnahan",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Jorje Varcelotti",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Andrew Detar",
+        "pts": 34.3,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Jeff Dunn",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Ken Macintyre",
+        "pts": 32,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Debbie Genter",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Doug Hochhauser",
+        "pts": 10.2,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Joe Lysaght",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Luke Karavolis",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Kelly Barr",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Crissy Canavan",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Lauren Buzzato",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Nino Arjona",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Doug Hochhauser",
+        "pts": 23,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Kent James",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Eva Medeiros",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Philip Levy",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Patti Esposito",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Tracey Palmieri",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Kevin Macintyre",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Cyndi Taylor",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Christine Zaccaria",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Nancy Marshall",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Todd Jaffe",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Wendy Liguori",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Karl Mocharko",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Lynn Brennan",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Joyce Ali",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Diane Snediker",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Sandra McCall",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Ronda Edkins",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Geralyn Lee",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "David Bahm",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Paul Carnahan",
+        "pts": 41.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Lisa Knavish",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Nicole Mocharko",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Barb Virany",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Frank Smith",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Susan Koza",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Mark Morrow",
+        "pts": 32.8,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Adam Morrow",
+        "pts": 32.8,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Laura Hutter",
+        "pts": 32,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Kelly Shelton",
+        "pts": 32.8,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Matthew Detar",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Jim Jenkins",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Stan Rockovich",
+        "pts": 31.1,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Shirley Shen",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Toni Detar",
+        "pts": 5.6,
+        "level": "lower",
+        "coordinator": false
+      },
+      {
+        "name": "Coordinator",
+        "pts": 0,
+        "level": "lower",
+        "coordinator": true
+      },
+      {
+        "name": "Coordinator",
+        "pts": 0,
+        "level": "upper"
+      }
+    ],
+    "log": [
+      {
+        "date": "5/22/2026",
+        "time": "03:36 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Mark Zaccaria",
+            "total": 584,
+            "breakdown": "adjusted from 0 → 584 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/22/2026",
+        "time": "03:35 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Dave Liguori",
+            "total": 349,
+            "breakdown": "adjusted from 0 → 349 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/22/2026",
+        "time": "03:35 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Michael Wertz",
+            "total": 350,
+            "breakdown": "adjusted from 0 → 350 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/22/2026",
+        "time": "03:35 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Dewey Humes",
+            "total": 478,
+            "breakdown": "adjusted from 0 → 478 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/22/2026",
+        "time": "03:35 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Nancy Hauan",
+            "total": 640,
+            "breakdown": "adjusted from 0 → 640 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/22/2026",
+        "time": "12:39 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Tim Ishida",
+            "total": 641,
+            "breakdown": "adjusted from 0 → 641 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/21/2026",
+        "time": "04:53 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Wayne D",
+            "total": -471.7,
+            "breakdown": "adjusted from 471.7 → 0 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/21/2026",
+        "time": "12:45 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "v",
+            "total": 75.5,
+            "breakdown": "adjusted from 258.5 → 334 pts"
+          }
+        ]
+      },
+      {
+        "date": "5/21/2026",
+        "time": "12:45 PM",
+        "day": "Manual adjustment",
+        "weekLabel": "",
+        "present": 0,
+        "summary": [
+          {
+            "name": "Brad",
+            "total": -19.7,
+            "breakdown": "adjusted from 352.7 → 333 pts"
+          }
+        ]
+      }
+    ],
+    "cfg": {
+      "showUp": 25,
+      "perGame": 12,
+      "perLoss": 2,
+      "absentPenalty": 30,
+      "courtMults": [
+        1.5,
+        1.2,
+        1,
+        0.85
+      ],
+      "_migrated_v2": true,
+      "courtNames": [
+        "Court 1",
+        "Court 2",
+        "Court 3",
+        "Court 4"
+      ]
+    },
+    "weeks": [
+      {
+        "label": "05/18/2026",
+        "sessions": {
+          "wed_lower": {
+            "done": false,
+            "present": []
+          },
+          "wed_upper": {
+            "done": false,
+            "present": []
+          },
+          "sat_lower": {
+            "done": false,
+            "present": []
+          },
+          "sat_upper": {
+            "done": false,
+            "present": []
+          }
+        },
+        "penalty_lower": false,
+        "penalty_upper": false
+      }
+    ],
+    "_lastBackupAt": 1779628018906
+  },
+  "sess": {
+    "phase": 0,
+    "day": "wed",
+    "weekIdx": 0,
+    "sessionLevel": "lower",
+    "present": [],
+    "courtSizes": [],
+    "rotationCount": 1,
+    "dropouts": [],
+    "fillIns": [],
+    "r1courts": [],
+    "r2courts": [],
+    "r1g": {},
+    "r1p": {},
+    "r2g": {},
+    "r2p": {},
+    "lastSummary": []
+  },
+  "version": "levelup-ladder-1",
+  "exportedAt": "2026-05-25T14:37:35.262Z"
+}
