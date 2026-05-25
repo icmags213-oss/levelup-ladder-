@@ -516,6 +516,20 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
 </style>
 </head>
 <body>
+
+<!-- PASSCODE LOCK SCREEN -->
+<div id="passcode-lock" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#000 0%,#062a06 45%,#0e5a18 100%);z-index:99999;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center;">
+    <div style="font-size:48px;margin-bottom:8px;">🔒</div>
+    <h2 style="margin:0 0 6px 0;font-size:20px;font-weight:700;color:#0e5a18;">LevelUp Ladder</h2>
+    <p style="margin:0 0 20px 0;font-size:13px;color:#697186;">Coordinator passcode required</p>
+    <input id="passcode-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="10" autocomplete="off" placeholder="Enter passcode" style="width:100%;padding:14px 16px;font-size:18px;text-align:center;letter-spacing:.3em;border:2px solid #e0e6ef;border-radius:12px;outline:none;margin-bottom:8px;font-family:ui-monospace,Menlo,Consolas,monospace;" onkeydown="if(event.key==='Enter')checkPasscode()" />
+    <div id="passcode-msg" style="font-size:12px;color:#d9534f;min-height:18px;margin-bottom:12px;"></div>
+    <button onclick="checkPasscode()" style="width:100%;padding:14px;background:#0e5a18;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Unlock</button>
+    <p style="margin:14px 0 0 0;font-size:11px;color:#a0a8b8;">For coordinator access only.</p>
+  </div>
+</div>
+
 <div class="app">
 
   <!-- HERO -->
@@ -725,6 +739,13 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
       </div>
       <div id="load-msg" style="font-size:12px;margin-top:10px;display:none;"></div>
     </div>
+    <div class="card save-box">
+      <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">🔒 Lock app</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Re-lock the app with the passcode. You'll need the passcode to unlock it again.</p>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn" onclick="lockApp()">🔒 Lock now</button>
+      </div>
+    </div>
     <div class="card save-box" style="border:2px solid #d9534f;background:linear-gradient(180deg,#fff5f5 0%,#fff 100%);">
       <h3 style="font-size:14px;font-weight:700;color:#a02622;margin-bottom:8px;">⚠️ Danger zone — Reset ladder</h3>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Start fresh by clearing data. <strong>Make a backup first</strong> — these actions cannot be undone.</p>
@@ -745,6 +766,53 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
 </div>
 
 <script>
+/* ====== Passcode lock ====== */
+const PASSCODE='24681';
+const PASSCODE_KEY='levelup-unlocked-v1';
+function isUnlocked(){
+  try{return localStorage.getItem(PASSCODE_KEY)==='yes';}catch(e){return false;}
+}
+function showPasscodeLock(){
+  document.getElementById('passcode-lock').style.display='flex';
+  setTimeout(()=>{
+    const inp=document.getElementById('passcode-input');
+    if(inp)inp.focus();
+  },100);
+}
+function hidePasscodeLock(){
+  document.getElementById('passcode-lock').style.display='none';
+}
+function checkPasscode(){
+  const inp=document.getElementById('passcode-input');
+  const msg=document.getElementById('passcode-msg');
+  if(!inp)return;
+  const entered=inp.value.trim();
+  if(entered===PASSCODE){
+    try{localStorage.setItem(PASSCODE_KEY,'yes');}catch(e){}
+    msg.style.color='#0e5a18';
+    msg.textContent='✓ Unlocked';
+    setTimeout(()=>hidePasscodeLock(),300);
+  } else {
+    msg.style.color='#d9534f';
+    msg.textContent='Wrong passcode. Try again.';
+    inp.value='';
+    inp.focus();
+  }
+}
+function lockApp(){
+  if(!confirm('🔒 Lock the app?\n\nYou\'ll need the passcode to unlock it again.\n\nContinue?'))return;
+  try{localStorage.removeItem(PASSCODE_KEY);}catch(e){}
+  const inp=document.getElementById('passcode-input');
+  if(inp)inp.value='';
+  const msg=document.getElementById('passcode-msg');
+  if(msg)msg.textContent='';
+  showPasscodeLock();
+}
+// Check on load
+if(!isUnlocked()){
+  showPasscodeLock();
+}
+
 /* ====== Theme ====== */
 function setTheme(mode){
   const isDark=mode==='dark';
