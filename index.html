@@ -704,6 +704,9 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
         <button class="btn btn-primary" onclick="downloadCloudData()">☁️ Generate data.json (after session)</button>
       </div>
       <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" style="background:#0e5a18;color:#fff;border-color:#0e5a18;" onclick="shareCloudData()">📨 Send data.json to Brenden</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
         <button class="btn" onclick="loadFromCloud()">⬇️ Load from cloud (before session)</button>
       </div>
       <p style="font-size:11px;color:var(--text-muted);margin-top:10px;"><strong>Workflow:</strong> 1) Tap "Generate data.json" → file downloads. 2) Upload it to your GitHub repo (replace existing <code>data.json</code>). 3) Other coordinator taps "Load from cloud" before their next session.</p>
@@ -715,37 +718,49 @@ body.dark .day-btn.done-day:hover{background:rgba(29,158,117,.28);}
       <div class="btn-row" style="margin-top:0;">
         <button class="btn btn-primary" onclick="downloadPublicStandings()">📤 Generate standings.html</button>
       </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn" style="background:#0e5a18;color:#fff;border-color:#0e5a18;" onclick="shareStandings()">📨 Send standings.html to Brenden</button>
+      </div>
       <p style="font-size:11px;color:var(--text-muted);margin-top:10px;">After downloading, upload it to your GitHub repo (same place as <code>index.html</code>) so players can visit <code>your-site/standings.html</code>.</p>
     </div>
     <div class="card save-box">
-      <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">⇩ Save backup</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Download a backup file (recommended) or copy a code to paste elsewhere.</p>
-      <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-primary" onclick="downloadBackup()">📥 Download backup file</button>
-        <button class="btn" onclick="emailBackup()">✉ Email to myself</button>
+      <div onclick="toggleAdvancedBackup()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:4px;">🛠️ More options (manual backup)</h3>
+          <p style="font-size:11px;color:var(--text-muted);margin:0;">Local backup file or backup code (rarely needed)</p>
+        </div>
+        <span id="advanced-backup-chevron" style="font-size:18px;color:var(--text-muted);transform:rotate(0deg);transition:transform .2s;">▶</span>
       </div>
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Or copy a backup code as text:</p>
-        <textarea id="save-out" readonly placeholder="Click 'Generate code' to create a backup code…"></textarea>
-        <div class="btn-row">
-          <button class="btn" onclick="generateBackup()">↻ Generate code</button>
-          <button class="btn" id="copy-btn" onclick="copyBackup()">⧉ Copy code</button>
+      <div id="advanced-backup-body" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
+        <h4 style="font-size:13px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">⇩ Save backup</h4>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Download a backup file or copy a code to paste elsewhere.</p>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-primary" onclick="downloadBackup()">📥 Download backup file</button>
+          <button class="btn" onclick="emailBackup()">✉ Email to myself</button>
+        </div>
+        <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft);">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Or copy a backup code as text:</p>
+          <textarea id="save-out" readonly placeholder="Click 'Generate code' to create a backup code…"></textarea>
+          <div class="btn-row">
+            <button class="btn" onclick="generateBackup()">↻ Generate code</button>
+            <button class="btn" id="copy-btn" onclick="copyBackup()">⧉ Copy code</button>
+          </div>
+        </div>
+        <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--border-soft);">
+          <h4 style="font-size:13px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">⇧ Load backup</h4>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Upload a backup file or paste a code.</p>
+          <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
+            <button class="btn btn-primary" onclick="document.getElementById('file-input').click();">📤 Upload backup file</button>
+            <input id="file-input" type="file" accept=".json,.txt,application/json" style="display:none;" onchange="uploadBackupFile(this)">
+          </div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Or paste a backup code:</p>
+          <textarea id="load-in" placeholder="Paste your backup code here…"></textarea>
+          <div class="btn-row">
+            <button class="btn" onclick="loadBackup()">✓ Load from code</button>
+          </div>
+          <div id="load-msg" style="font-size:12px;margin-top:10px;display:none;"></div>
         </div>
       </div>
-    </div>
-    <div class="card save-box">
-      <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">⇧ Load backup</h3>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Upload a backup file or paste a code.</p>
-      <div class="btn-row" style="margin-top:0;margin-bottom:10px;">
-        <button class="btn btn-primary" onclick="document.getElementById('file-input').click();">📤 Upload backup file</button>
-        <input id="file-input" type="file" accept=".json,.txt,application/json" style="display:none;" onchange="uploadBackupFile(this)">
-      </div>
-      <p style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Or paste a backup code:</p>
-      <textarea id="load-in" placeholder="Paste your backup code here…"></textarea>
-      <div class="btn-row">
-        <button class="btn" onclick="loadBackup()">✓ Load from code</button>
-      </div>
-      <div id="load-msg" style="font-size:12px;margin-top:10px;display:none;"></div>
     </div>
     <div class="card save-box">
       <h3 style="font-size:14px;font-weight:700;color:var(--text-strong);margin-bottom:8px;">🔒 Lock app</h3>
@@ -825,6 +840,14 @@ function checkPasscode(){
     inp.value='';
     inp.focus();
   }
+}
+function toggleAdvancedBackup(){
+  const body=document.getElementById('advanced-backup-body');
+  const chev=document.getElementById('advanced-backup-chevron');
+  if(!body||!chev)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  chev.style.transform=open?'rotate(0deg)':'rotate(90deg)';
 }
 function lockApp(){
   if(!confirm('🔒 Lock the app?\n\nYou\'ll need the passcode to unlock it again.\n\nContinue?'))return;
@@ -3097,6 +3120,65 @@ function downloadPublicStandings(){
   document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+async function shareStandings(){
+  // Build the same payload as downloadPublicStandings
+  const players=S.players.map(p=>({
+    name:p.name,
+    level:playerLevel(p),
+    pts:p.pts||0
+  }));
+  const stats={};
+  S.players.forEach(p=>{
+    const s=computePlayerStats(p.name);
+    stats[p.name]={
+      events:s.events,
+      sessions:s.sessions,
+      matches:s.matches,
+      wins:s.wins,
+      losses:s.losses,
+      winPct:s.winPct,
+      ladderPoints:p.pts||0,
+      ptsScored:s.ptsScored,
+      ptsConceded:s.ptsConceded,
+      avgRankChange:s.avgRankChange,
+      sessionHistory:s.sessionHistory,
+      rankHistory:s.rankHistory
+    };
+  });
+  const now=new Date();
+  const stamp=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const updated=now.toLocaleString();
+  const payload={players,stats,updated};
+  const html=buildStandingsHtml(payload);
+  const file=new File([html],'standings.html',{type:'text/html'});
+  const shareData={
+    title:'LevelUp Ladder — standings.html',
+    text:'Hi Brenden,\n\nAttached are the latest public standings ('+stamp+').\n\nUpload this to GitHub (replace existing standings.html) so players can view at:\nhttps://icmags213-oss.github.io/levelup-ladder-/standings.html\n\nThanks!',
+    files:[file]
+  };
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{
+      await navigator.share(shareData);
+      return;
+    }catch(err){
+      if(err.name==='AbortError')return;
+    }
+  }
+  // Fallback
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='standings.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  setTimeout(()=>{
+    const subject=encodeURIComponent('LevelUp Ladder standings — '+stamp);
+    const body=encodeURIComponent('Hi Brenden,\n\nI generated the latest standings.html — it just downloaded to my phone. Please attach it manually from your Downloads folder.\n\nThanks!');
+    if(confirm('⚠️ This phone does not support direct file sharing.\n\nThe file downloaded to your phone. Tap OK to open email — you\'ll need to manually attach standings.html from your Downloads folder.\n\nContinue?')){
+      window.location.href='mailto:'+COORDINATOR_EMAIL+'?subject='+subject+'&body='+body;
+    }
+  },400);
+}
 
 function buildStandingsHtml(payload){
   const dataJson=JSON.stringify(payload).replace(/</g,'\\u003c');
@@ -3257,6 +3339,7 @@ function downloadBackup(){
 
 /* ====== Cloud sync (GitHub) ====== */
 const CLOUD_DATA_URL='https://icmags213-oss.github.io/levelup-ladder-/data.json';
+const COORDINATOR_EMAIL='Brenden@leveluppickleball.com';
 function downloadCloudData(){
   const json=backupPayload();
   const blob=new Blob([json],{type:'application/json'});
@@ -3272,6 +3355,43 @@ function downloadCloudData(){
   setTimeout(()=>{
     alert('✅ data.json downloaded!\n\nNext steps:\n1. Open your GitHub repo\n2. Tap "Add file" → "Upload files"\n3. Upload data.json (replace if it exists)\n4. Commit changes\n\nOther coordinators can then tap "Load from cloud" to get this data.');
   },300);
+}
+async function shareCloudData(){
+  const json=backupPayload();
+  const now=new Date();
+  const stamp=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const file=new File([json],'data.json',{type:'application/json'});
+  const shareData={
+    title:'LevelUp Ladder — data.json',
+    text:'Hi Brenden,\n\nAttached is the latest LevelUp Ladder data ('+stamp+').\n\nUpload this to GitHub (replace existing data.json) so coordinators can sync.\n\nThanks!',
+    files:[file]
+  };
+  // Try native share with file
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{
+      await navigator.share(shareData);
+      markBackupTaken();
+      return;
+    }catch(err){
+      if(err.name==='AbortError')return; // user cancelled
+      // fall through to fallback
+    }
+  }
+  // Fallback: download file + open mailto
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  markBackupTaken();
+  setTimeout(()=>{
+    const subject=encodeURIComponent('LevelUp Ladder data.json — '+stamp);
+    const body=encodeURIComponent('Hi Brenden,\n\nI generated the latest data.json — it just downloaded to my phone. Please attach it manually from your Downloads folder.\n\nThanks!');
+    if(confirm('⚠️ This phone does not support direct file sharing.\n\nThe file downloaded to your phone. Tap OK to open email — you\'ll need to manually attach data.json from your Downloads folder.\n\nContinue?')){
+      window.location.href='mailto:'+COORDINATOR_EMAIL+'?subject='+subject+'&body='+body;
+    }
+  },400);
 }
 async function loadFromCloud(){
   if(!confirm('⚠️ Load from cloud?\n\nThis will REPLACE all current data (players, ladder, history) with the latest from GitHub.\n\nYour current data will be lost unless you backed it up.\n\nContinue?')){
