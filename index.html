@@ -823,11 +823,11 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
   <div class="dashboard">
     <div class="stat-box">
       <div class="stat-icon" style="background:#2462d7;">👥</div>
-      <div><div class="stat-value" id="stat-players">0</div><div class="stat-label">Players</div></div>
+      <div><div class="stat-value" id="stat-players">0</div><div class="stat-label">Roster entries</div></div>
     </div>
     <div class="stat-box">
       <div class="stat-icon" style="background:#1a6b3a;">★</div>
-      <div><div class="stat-value" id="stat-leader">—</div><div class="stat-label">Top of ladder</div></div>
+      <div><div class="stat-value" id="stat-leader">—</div><div class="stat-label">Separate ladders</div></div>
     </div>
     <div class="stat-box">
       <div class="stat-icon" style="background:#ef9f27;">📅</div>
@@ -857,7 +857,7 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <div style="flex:1;">
         <div class="mini-label">Standings</div>
         <h4>Current ladders</h4>
-        <p>Men’s and Women’s ladders — ranked by total points.</p>
+        <p>Tuesday Morning and Wednesday Evening · Four separate ladders.</p>
       </div>
       <button class="btn no-print" onclick="printLadder()" title="Print ladders">🖨 Print</button>
     </div>
@@ -865,25 +865,10 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <h1>LevelUp Pickleball Ladders</h1>
       <p id="print-date"></p>
     </div>
-    <div class="ladder-grid">
-      <div>
-        <button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="upper" onclick="toggleLadder('upper')" style="background:#E1F5EE;color:#085041;">
-          <span class="ladder-chevron" id="chev-upper">▶</span>
-          <span>Men’s Ladder</span><span class="ladder-tag">Standings</span>
-        </button>
-        <div id="ladder-upper" class="ladder-section" style="display:none;"></div>
-      </div>
-      <div>
-        <button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="lower" onclick="toggleLadder('lower')" style="background:#E6F1FB;color:#0C447C;">
-          <span class="ladder-chevron" id="chev-lower">▶</span>
-          <span>Women’s Ladder</span><span class="ladder-tag">Standings</span>
-        </button>
-        <div id="ladder-lower" class="ladder-section" style="display:none;"></div>
-      </div>
-    </div>
+    <div class="ladder-grid"><div><button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="upper" onclick="toggleLadder('upper')"><span class="ladder-chevron" id="chev-upper">▶</span><span>Tuesday Morning<br>Men’s Ladder</span></button><div id="ladder-upper" class="ladder-section" style="display:none"></div></div><div><button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="lower" onclick="toggleLadder('lower')"><span class="ladder-chevron" id="chev-lower">▶</span><span>Tuesday Morning<br>Women’s Ladder</span></button><div id="ladder-lower" class="ladder-section" style="display:none"></div></div><div><button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="wed_upper" onclick="toggleLadder('wed_upper')"><span class="ladder-chevron" id="chev-wed_upper">▶</span><span>Wednesday Evening<br>Men’s Ladder</span></button><div id="ladder-wed_upper" class="ladder-section" style="display:none"></div></div><div><button type="button" class="ladder-heading ladder-heading-btn collapsed" data-level="wed_lower" onclick="toggleLadder('wed_lower')"><span class="ladder-chevron" id="chev-wed_lower">▶</span><span>Wednesday Evening<br>Women’s Ladder</span></button><div id="ladder-wed_lower" class="ladder-section" style="display:none"></div></div></div>
     <div class="card club-public-tools no-print" style="margin-top:20px">
       <div class="section-head"><div><div class="mini-label">Share with players</div><h3>Public standings</h3></div></div>
-      <p class="club-helper">Export a read-only page with both ladders and player stats. Upload it to your club site as <code>standings.html</code>.</p>
+      <p class="club-helper">Export a read-only page with all four ladders and player stats. Upload it to your club site as <code>standings.html</code>.</p>
       <div class="btn-row"><button class="btn btn-primary" onclick="downloadPublicStandings()">Download standings</button><button class="btn" onclick="shareStandings()">Share standings</button></div>
     </div>
   </div>
@@ -903,10 +888,7 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:10px;">Add a new player</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <input type="text" id="new-name" placeholder="Player name" style="flex:1;min-width:180px;">
-        <select id="new-level" style="min-width:120px;">
-          <option value="lower">Women’s Ladder</option>
-          <option value="upper">Men’s Ladder</option>
-        </select>
+        <select id="new-level" style="min-width:120px;"><option value="upper">Tuesday Morning · Men’s</option><option value="lower">Tuesday Morning · Women’s</option><option value="wed_upper">Wednesday Evening · Men’s</option><option value="wed_lower">Wednesday Evening · Women’s</option></select>
         <button class="btn btn-primary" onclick="addPlayer()">+ Add player</button>
       </div>
     </div>
@@ -998,19 +980,12 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
         <button class="btn" onclick="document.getElementById('file-input').click()">Restore backup</button>
       </div>
       <input id="file-input" type="file" accept=".json,.txt,application/json" hidden onchange="uploadBackupFile(this)">
-      <p class="club-helper">Restoring replaces the data on this device. Download a backup first if you need to keep it.</p>
+      <p class="club-helper">Restoring replaces your ladder data and syncs it to your signed-in devices. Backups from before the four-ladder update import player names with zero points.</p>
       <div id="club-share-status" class="club-helper" role="status"></div>
       <div id="load-msg" style="font-size:12px;margin-top:10px;display:none;" role="status"></div>
     </div>
     <div id="last-backup-hint" class="card club-backup-reminder" style="display:none"><strong>Reminder</strong><p id="last-backup-text" class="club-helper"></p></div>
-    <details class="card club-disclosure">
-      <summary>Coordinator data <span>Exchange updates between devices</span></summary>
-      <div class="club-disclosure-body">
-        <p class="club-helper">Download or share the coordinator file after a session. Upload it to your club’s GitHub repository as <code>data.json</code>. Other coordinators can load that copy before their session.</p>
-        <div class="btn-row"><button class="btn" onclick="downloadCloudData()">Download coordinator file</button><button class="btn" onclick="shareCloudData()">Share coordinator file</button><button class="btn" onclick="loadFromCloud()">Load club copy</button></div>
-        <p class="club-helper">This is a manual file exchange. Loading the club copy replaces your local data.</p>
-      </div>
-    </details>
+    <div class="card"><h3>Automatic syncing</h3><p class="club-helper">Your signed-in devices update automatically while online.</p><button class="btn" onclick="clubSyncOpen()">Open syncing settings</button></div>
     <details class="card club-disclosure">
       <summary>Advanced recovery <span>Copy or restore a backup code</span></summary>
       <div class="club-disclosure-body" id="advanced-backup-body">
@@ -1029,7 +1004,7 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 
 <script src="supabase-2.102.0.js"></script>
 <script src="sync-core.js"></script>
-<script src="public-template.js"></script>
+<script src="public-template.js?v=23"></script>
 <script>
 /* ====== Passcode lock ====== */
 const PASSCODE='24681';
@@ -1122,12 +1097,26 @@ function initTheme(){
 /* ====== Avatar palette (kept from original) ====== */
 const COLORS=['#EEEDFE:#3C3489','#E1F5EE:#085041','#FAECE7:#712B13','#E6F1FB:#0C447C','#FAEEDA:#633806','#FBEAF0:#72243E','#EAF3DE:#27500A','#FCEBEB:#791F1F','#F1EFE8:#444441'];
 
-const LEVELS={
-  lower:{id:'lower',label:'Women’s Ladder',short:'Women’s',color:'#2462d7',bg:'#E6F1FB',tx:'#0C447C'},
-  upper:{id:'upper',label:'Men’s Ladder',short:'Men’s',color:'#085041',bg:'#E1F5EE',tx:'#085041'}
-};
+const LEVELS={"upper": {"id": "upper", "label": "Tuesday Morning · Men’s Ladder", "short": "Men’s", "schedule": "Tuesday Morning", "day": "tue", "color": "#085041", "bg": "#eef1e4", "tx": "#173f2e"}, "lower": {"id": "lower", "label": "Tuesday Morning · Women’s Ladder", "short": "Women’s", "schedule": "Tuesday Morning", "day": "tue", "color": "#085041", "bg": "#eef1e4", "tx": "#173f2e"}, "wed_upper": {"id": "wed_upper", "label": "Wednesday Evening · Men’s Ladder", "short": "Men’s", "schedule": "Wednesday Evening", "day": "wed", "color": "#085041", "bg": "#eef1e4", "tx": "#173f2e"}, "wed_lower": {"id": "wed_lower", "label": "Wednesday Evening · Women’s Ladder", "short": "Women’s", "schedule": "Wednesday Evening", "day": "wed", "color": "#085041", "bg": "#eef1e4", "tx": "#173f2e"}};
+const LADDER_IDS=Object.keys(LEVELS);
 function lvl(id){return LEVELS[id]||LEVELS.lower;}
-function playerLevel(p){return (p&&p.level==='upper')?'upper':'lower';}
+function playerLevel(p){return LEVELS[p?.level]?p.level:'lower';}
+function clubMigrateLadders(){
+ if(S.ladderSchemaVersion!==2){
+  const before=JSON.stringify({S,sess});
+  // Keep the old season on this device before the one-time reset.
+  localStorage.setItem('levelup-before-four-ladders',before);
+  const original=S.players||[];
+  S.players=original.map(p=>({...p,level:p.level==='upper'?'upper':'lower',pts:0,_clubId:p._clubId||clubId()}));
+  S.players.push(...S.players.map(p=>({...p,level:'wed_'+p.level,_clubId:clubId()})));
+  S.weeks=[];S.log=[];delete S._clubHistory;
+  sess={phase:0,day:'',weekIdx:-1,sessionLevel:'',present:[],courtSizes:[],rotationCount:1,dropouts:[],fillIns:[],r1courts:[],r2courts:[],r1g:{},r1p:{},r1c:{},r2g:{},r2p:{},r2c:{},lastSummary:[]};
+  S.ladderSchemaVersion=2;
+ }
+ S.cfg.absentPenalty=0;
+ S.players.forEach(p=>{if(!LEVELS[p.level])p.level='lower';});
+ S.weeks.forEach(w=>{if(!w.sessions)w.sessions={};for(const id of LADDER_IDS){const key=lvl(id).day+'_'+id;if(!w.sessions[key])w.sessions[key]={done:false,present:[]};}});
+}
 function lastName(name){
   // Last whitespace-separated token, falling back to the whole name (e.g. "Madonna")
   const parts=String(name||'').trim().split(/\s+/);
@@ -1138,7 +1127,7 @@ const DEFAULT_CFG={
   showUp:20,
   perGame:12,
   perLoss:4,
-  absentPenalty:20,
+  absentPenalty:0,
   courtMults:[1.3,1.15,1.0,0.9],
   courtNames:['Court 1','Court 2','Court 3','Court 4']
 };
@@ -1173,25 +1162,9 @@ async function load(){
   if(!S.weeks)S.weeks=[];
   if(!S.players)S.players=[];
   if(!S.log)S.log=[];
-  // Migrate: ensure every player has a level
-  S.players.forEach(p=>{if(p.level!=='upper'&&p.level!=='lower')p.level='lower';});
-  // Migrate week schema: old wedDone/satDone -> per-level done flags (default to lower)
-  S.weeks.forEach(w=>{
-    if(!w.sessions)w.sessions={};
-    ['wed','sat'].forEach(d=>{
-      ['lower','upper'].forEach(lv=>{
-        const key=d+'_'+lv;
-        if(!w.sessions[key])w.sessions[key]={done:false,present:[]};
-      });
-    });
-    // Migrate legacy fields once
-    if(w.wedDone&&!w.sessions.wed_lower.done){
-      w.sessions.wed_lower={done:true,present:w.wedPresent||[]};
-    }
-    if(w.satDone&&!w.sessions.sat_lower.done){
-      w.sessions.sat_lower={done:true,present:w.satPresent||[]};
-    }
-  });
+  clubMigrateLadders();
+  await storageSet(STORAGE_KEY,JSON.stringify(S));
+  await storageSet(SESS_KEY,JSON.stringify(sess));
   // Integrity check: if sess claims an in-progress session but required arrays/indices are invalid, reset it
   try{
     if(sess&&sess.phase>0&&sess.phase<4){
@@ -1267,19 +1240,7 @@ function currentWeekLabel(){
   const yyyy=monday.getFullYear();
   return `${mm}/${dd}/${yyyy}`;
 }
-function newWeek(label){
-  return{
-    label,
-    sessions:{
-      wed_lower:{done:false,present:[]},
-      wed_upper:{done:false,present:[]},
-      sat_lower:{done:false,present:[]},
-      sat_upper:{done:false,present:[]}
-    },
-    penalty_lower:false,
-    penalty_upper:false
-  };
-}
+function newWeek(label){return {label,sessions:Object.fromEntries(LADDER_IDS.map(id=>[lvl(id).day+'_'+id,{done:false,present:[]}]))};}
 function ensureCurrentWeek(){
   if(S.weeks.length===0){
     S.weeks.unshift(newWeek(''));
@@ -1381,7 +1342,7 @@ function _renderSessionInner(){
 
   if(sess.phase>0&&sess.phase<4){
     let html=renderSteps(sess.phase);
-    const dayLabel=sess.day==='wed'?'1st Session':'2nd Session';
+    const dayLabel=lvl(sess.sessionLevel).schedule;
     const week=S.weeks[sess.weekIdx]||{};
 
     if(sess.phase===1){
@@ -1419,7 +1380,7 @@ function _renderSessionInner(){
   }
 
   if(sess.phase===4){
-    let html=`<div class="phase-banner pdone">✓ ${sess.day==='wed'?'1st Session':'2nd Session'} complete!</div>`;
+    let html=`<div class="phase-banner pdone">✓ ${lvl(sess.sessionLevel).schedule} complete!</div>`;
     html+=renderSessionSummary();
     html+=`<div class="card" style="background:#FAEEDA;border-color:#ef9f27;margin-top:14px;">
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#633806;">
@@ -1457,8 +1418,8 @@ function renderWeekPicker(el){
     <div class="welcome-icon">📅</div>
     <div>
       <div class="mini-label">Run an event</div>
-      <h4>Pick a week, session, and level</h4>
-      <p>Men’s Ladder and Women’s Ladder run separately.</p>
+      <h4>Choose your ladder</h4>
+      <p>Tuesday Morning and Wednesday Evening each have separate Men’s and Women’s standings. No absence penalties.</p>
     </div>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
@@ -1469,11 +1430,11 @@ function renderWeekPicker(el){
   S.weeks.forEach((week,wi)=>{
     const isCurrent=week.label===currentWeekLabel();
     const sess_=week.sessions;
-    const allDone=sess_.wed_lower.done&&sess_.wed_upper.done&&sess_.sat_lower.done&&sess_.sat_upper.done;
+    const allDone=LADDER_IDS.every(id=>sess_[lvl(id).day+'_'+id]?.done);
     const sessionBtn=(day,lv)=>{
       const s=sess_[day+'_'+lv];
       const lvInfo=lvl(lv);
-      const dayLabel=day==='wed'?'1st Session':'2nd Session';
+      const dayLabel=lvInfo.schedule;
       const fn=s.done?'redoSession':'startSession';
       const action=`event.stopPropagation();${fn}(${wi},'${day}','${lv}');return false;`;
       return`<button type="button" class="day-btn level-btn club-session-card ${s.done?'done-day':''}" onclick="${action}">
@@ -1482,10 +1443,6 @@ function renderWeekPicker(el){
         <span class="club-session-action">${s.done?'View / edit':'Start session'}<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></span>
       </button>`;
     };
-    const penLower=week.penalty_lower?'<span style="font-size:11px;color:var(--text-muted);margin-right:8px;">✓ Women’s penalty applied</span>':`<button class="btn btn-sm" onclick="applyPenalty(${wi},'lower')" style="margin-right:6px;">⊘ Women’s penalty</button>`;
-    const penUpper=week.penalty_upper?'<span style="font-size:11px;color:var(--text-muted);">✓ Men’s penalty applied</span>':`<button class="btn btn-sm" onclick="applyPenalty(${wi},'upper')">⊘ Men’s penalty</button>`;
-    const showLowerPen=(sess_.wed_lower.done||sess_.sat_lower.done)&&!week.penalty_lower;
-    const showUpperPen=(sess_.wed_upper.done||sess_.sat_upper.done)&&!week.penalty_upper;
     html+=`<div class="week-card" id="club-week-${wi}">
       <div class="week-header">
         <span class="week-label club-week-heading">${clubCalendarBadge(week.label)}<span>Week of ${week.label?esc(week.label):'<span style="opacity:.45;font-style:italic;">MM/DD/YYYY</span>'}</span></span>
@@ -1496,18 +1453,13 @@ function renderWeekPicker(el){
         <button class="btn btn-sm week-action-btn" onclick="event.stopPropagation();deleteWeek(${wi});return false;" title="Delete week">🗑 Delete</button>
       </div>
       <div class="day-row" style="margin-bottom:8px;">
-        ${sessionBtn('wed','upper')}
-        ${sessionBtn('wed','lower')}
+        ${sessionBtn('tue','upper')}
+        ${sessionBtn('tue','lower')}
       </div>
       <div class="day-row">
-        ${sessionBtn('sat','upper')}
-        ${sessionBtn('sat','lower')}
+        ${sessionBtn('wed','wed_upper')}
+        ${sessionBtn('wed','wed_lower')}
       </div>
-      ${(showLowerPen||showUpperPen||week.penalty_lower||week.penalty_upper)?`
-        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-          ${(showLowerPen||week.penalty_lower)?penLower:''}
-          ${(showUpperPen||week.penalty_upper)?penUpper:''}
-        </div>`:''}
     </div>`;
   });
 
@@ -1571,13 +1523,13 @@ function redoSession(wi,day,level){
   const key=day+'_'+level;
   const slot=week.sessions[key];
   if(!slot||!slot.done)return;
-  const dayName=day==='wed'?'1st Session':'2nd Session';
+  const dayName=lvl(level).schedule;
   const lvLabel=lvl(level).label;
   if(!confirm(`Redo ${dayName} · ${lvLabel} for "${week.label}"?\n\nThis will:\n• roll back points awarded in that session\n• remove its history entry\n• undo this week's ${lvLabel} absence penalty if it was applied\n• drop you into the session flow to re-enter results`))return;
 
   // Find the matching log entry (most recent one for this week+day+level)
   // Match new labels first, but fall back to legacy day names for older entries
-  const newLabel=day==='wed'?'1st Session':'2nd Session';
+  const newLabel=lvl(level).schedule;
   const legacyLabel=day==='wed'?'Wednesday':'Saturday';
   const logIdx=S.log.findIndex(e=>e.weekLabel===week.label&&(e.day===newLabel||e.day===legacyLabel)&&(e.level||'lower')===level);
   if(logIdx>=0){
@@ -1622,7 +1574,7 @@ function startSession(weekIdx,day,level){
 
 function renderPlayerPicker(el){
   const week=S.weeks[sess.weekIdx];
-  const dayName=sess.day==='wed'?'1st Session':'2nd Session';
+  const dayName=lvl(sess.sessionLevel).schedule;
   const presentCount=sess.present.length;
 
   // Auto-fill courtSizes once we have players and nothing set yet
@@ -2806,7 +2758,7 @@ function finishSession(){
   S.log.unshift({
     date:now.toLocaleDateString(),
     time:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
-    day:(sess.day==='wed'?'1st Session':'2nd Session'),
+    day:(lvl(sess.sessionLevel).schedule),
     level:sess.sessionLevel,
     weekLabel:week.label,
     present:sess.present.length,
@@ -2821,39 +2773,11 @@ function finishSession(){
   save();renderAll();renderSession();
 }
 
-function applyPenalty(wi,level){
-  const week=S.weeks[wi];
-  const flagKey='penalty_'+level;
-  if(week[flagKey])return;
-  const wed=week.sessions['wed_'+level];
-  const sat=week.sessions['sat_'+level];
-  const attended=new Set([...(wed.present||[]),...(sat.present||[])]);
-  const penalized=[];
-  S.players.forEach((pl,i)=>{
-    if(playerLevel(pl)!==level)return;
-    if(!attended.has(i)){
-      pl.pts=Math.max(0,(pl.pts||0)-S.cfg.absentPenalty);
-      penalized.push({name:pl.name,total:-S.cfg.absentPenalty,breakdown:'missed both sessions'});
-    }
-  });
-  week[flagKey]=true;
-  const now=new Date();
-  S.log.unshift({
-    date:now.toLocaleDateString(),
-    time:now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
-    day:'Absence penalty',
-    level,
-    weekLabel:week.label,
-    present:0,
-    summary:penalized
-  });
-  save();renderAll();renderSession();
-}
+function applyPenalty(){ /* Absence deductions are disabled. */ }
 
 /* ====== Ladder ====== */
 function renderLadder(){
-  renderOneLadder('upper');
-  renderOneLadder('lower');
+  LADDER_IDS.forEach(renderOneLadder);
   updateDashboard();
 }
 
@@ -2890,7 +2814,7 @@ function renderOneLadder(level){
     const barW=Math.max(3,Math.round(((p.pts||0)/maxPts)*100));
     const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
-    return`<div class="ladder-row ladder-row-clickable" onclick="showPlayerStats('${esc(p.name).replace(/'/g,"\\'")}')" title="View player stats">
+    return`<div class="ladder-row ladder-row-clickable" onclick="showPlayerStats(${origIdx})" title="View player stats">
       <span class="lrank ${rankClass}">${String(i+1).padStart(2,'0')}</span>
       <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
       <div style="flex:1;min-width:0">
@@ -2908,7 +2832,8 @@ function renderOneLadder(level){
 }
 
 // ---- Player stats (history) ----
-function computePlayerStats(playerName){
+function computePlayerStats(playerName,playerId){
+  const currentPlayer=playerId?S.players.find(p=>p._clubId===playerId):S.players.find(p=>p.name===playerName);
   const stats={
     name:playerName,
     events:0,         // weeks they attended at least one session of
@@ -2930,7 +2855,7 @@ function computePlayerStats(playerName){
 
   entries.forEach(entry=>{
     if(!entry.summary)return;
-    const currentPlayer=S.players.find(p=>p.name===playerName);
+    if(currentPlayer&&entry.level!==playerLevel(currentPlayer))return;
     if(['Absence penalty','Manual adjustment'].includes(entry.day))return;
     const row=entry.summary.find(s=>s.playerId&&currentPlayer? s.playerId===currentPlayer._clubId : s.name===playerName);
     if(!row)return;
@@ -3002,10 +2927,10 @@ function computePlayerStats(playerName){
   return stats;
 }
 
-function showPlayerStats(playerName){
-  const p=S.players.find(pl=>pl.name===playerName);
+function showPlayerStats(playerIndex){
+  const p=S.players[playerIndex];
   if(!p){alert('Player not found.');return;}
-  const stats=computePlayerStats(playerName);
+  const stats=computePlayerStats(p.name,p._clubId);
   const pi=S.players.indexOf(p);
   const c=col(pi);
   const lvInfo=lvl(playerLevel(p));
@@ -3128,10 +3053,7 @@ function renderPlayerList(){
   const q=(window._playerSearchQuery||'').trim().toLowerCase();
   if(!window._playerGroupOpen)window._playerGroupOpen={upper:false,lower:false};
   const forceOpen=!!q; // searching auto-expands matching groups
-  const groups=[
-    {level:'upper',title:'Men’s Ladder',headColor:lvl('upper')},
-    {level:'lower',title:'Women’s Ladder',headColor:lvl('lower')}
-  ];
+  const groups=LADDER_IDS.map(level=>({level,title:lvl(level).label,headColor:lvl(level)}));
   let html='';
   let totalMatches=0;
   groups.forEach(g=>{
@@ -3159,7 +3081,7 @@ function renderPlayerList(){
             <span class="ppts">${p.pts||0} pts</span>
             <button class="btn btn-sm edit-btn" onclick="editPoints(${i})" title="Edit points">✎ pts</button>
             <button class="btn btn-sm edit-btn" onclick="toggleCoordinator(${i})" title="${isCoord?'Remove coordinator flag':'Mark as ladder coordinator'}" style="${isCoord?'color:#ef9f27;':''}">★</button>
-            <button class="btn btn-sm edit-btn" onclick="editPlayerLevel(${i})" title="Change ladder">⇄</button>
+            <select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)" style="max-width:230px">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label)+'</option>').join('')}</select>
             <button class="btn btn-sm edit-btn" onclick="editPlayerName(${i})" title="Edit name">⌨ name</button>
             <button class="btn btn-sm btn-danger" onclick="removePlayer(${i})">🗑</button>
           </div>`;
@@ -3216,20 +3138,17 @@ function editPlayerName(i){
   const next=input.trim();
   if(!next){alert('Name cannot be empty.');return;}
   if(next===pl.name)return;
-  const dup=S.players.find((p,idx)=>idx!==i&&p.name.toLowerCase()===next.toLowerCase());
+  const dup=S.players.find((p,idx)=>idx!==i&&playerLevel(p)===playerLevel(pl)&&p.name.toLowerCase()===next.toLowerCase());
   if(dup&&!confirm(`Another player is already named "${dup.name}". Use this name anyway?`))return;
   pl.name=next;
   save();renderAll();
 }
 
-function editPlayerLevel(i){
-  const pl=S.players[i];
-  if(!pl)return;
-  const cur=playerLevel(pl);
-  const next=cur==='upper'?'lower':'upper';
-  if(!confirm(`Move ${pl.name} from ${lvl(cur).label} to ${lvl(next).label} ladder?`))return;
-  pl.level=next;
-  save();renderAll();
+function editPlayerLevel(i,next){
+ const pl=S.players[i];if(!pl||!LEVELS[next])return;
+ if(clubHasDraft()){alert('Finish or cancel the active session before moving players.');renderPlayerList();return;}
+ if(S.players.some((p,j)=>j!==i&&playerLevel(p)===next&&p.name.toLowerCase()===pl.name.toLowerCase())){alert('This player is already in that ladder.');renderPlayerList();return;}
+ pl.level=next;save();renderAll();
 }
 
 function toggleCoordinator(i){
@@ -3250,12 +3169,14 @@ function addPlayer(){
   const inp=document.getElementById('new-name');
   const lvSel=document.getElementById('new-level');
   const name=inp.value.trim();if(!name)return;
-  const level=lvSel&&lvSel.value==='upper'?'upper':'lower';
+  const level=LEVELS[lvSel?.value]?lvSel.value:'lower';
+  if(S.players.some(p=>playerLevel(p)===level&&p.name.toLowerCase()===name.toLowerCase())){alert('This player is already in that ladder.');return;}
   S.players.push({name,pts:0,level});
   inp.value='';
   save();renderAll();
 }
 function removePlayer(i){
+  if(clubHasDraft()){alert('Finish or cancel the active session before removing players.');return;}
   if(!confirm('Remove '+S.players[i].name+'?'))return;
   S.players.splice(i,1);save();renderAll();
 }
@@ -3290,11 +3211,7 @@ function renderSettings(){
       <input type="number" min="0" step="any" inputmode="decimal" aria-label="Points per loss" data-setting="perLoss" value="${cfg.perLoss}" oninput="updateCfg('perLoss',this.value,this)" onblur="clubFinishSetting(this)" style="width:80px;text-align:center;">
       <span style="font-size:12px;color:var(--text-muted)">pts</span>
     </div>
-    <div class="settings-row">
-      <span class="settings-label">⊘ Miss both sessions penalty</span>
-      <input type="number" min="0" step="any" inputmode="decimal" aria-label="Absence penalty" data-setting="absentPenalty" value="${cfg.absentPenalty}" oninput="updateCfg('absentPenalty',this.value,this)" onblur="clubFinishSetting(this)" style="width:80px;text-align:center;">
-      <span style="font-size:12px;color:var(--text-muted)">pts</span>
-    </div>
+    <p class="club-helper">No absence penalties. Missing a session does not deduct points.</p>
   </div>
   <div class="card">
     <div class="section-title">Court tiers</div>
@@ -3342,7 +3259,7 @@ function clubSettingNumber(val,min,max,input){
   return n;
 }
 function updateCfg(key,val,input){
-  if(!['showUp','perGame','perLoss','absentPenalty'].includes(key))return;
+  if(!['showUp','perGame','perLoss'].includes(key))return;
   const n=clubSettingNumber(val,0,Infinity,input);if(n===null)return;
   S.cfg[key]=n;save();clubSettingsPreview();
 }
@@ -3429,6 +3346,7 @@ function downloadPublicStandings(){
   // Build a snapshot of just what players should see: players (name, level, points) + each player's stats.
   // No settings, no log details, no backup-y stuff.
   const players=S.players.map(p=>({
+    id:p._clubId,
     name:p.name,
     level:playerLevel(p),
     pts:p.pts||0
@@ -3436,8 +3354,8 @@ function downloadPublicStandings(){
   // Pre-compute each player's stats so the standings page is fully self-contained.
   const stats={};
   S.players.forEach(p=>{
-    const s=computePlayerStats(p.name);
-    stats[p.name]={
+    const s=computePlayerStats(p.name,p._clubId);
+    stats[p._clubId]={
       events:s.events,
       sessions:s.sessions,
       matches:s.matches,
@@ -3470,14 +3388,15 @@ function downloadPublicStandings(){
 async function shareStandings(){
   // Build the same payload as downloadPublicStandings
   const players=S.players.map(p=>({
+    id:p._clubId,
     name:p.name,
     level:playerLevel(p),
     pts:p.pts||0
   }));
   const stats={};
   S.players.forEach(p=>{
-    const s=computePlayerStats(p.name);
-    stats[p.name]={
+    const s=computePlayerStats(p.name,p._clubId);
+    stats[p._clubId]={
       events:s.events,
       sessions:s.sessions,
       matches:s.matches,
@@ -3753,41 +3672,7 @@ async function shareCloudData(){
     }
   },400);
 }
-async function loadFromCloud(){
-  if(!confirm('⚠️ Load from cloud?\n\nThis will REPLACE all current data (players, ladder, history) with the latest from GitHub.\n\nYour current data will be lost unless you backed it up.\n\nContinue?')){
-    return;
-  }
-  try{
-    const cacheBust='?t='+Date.now();
-    const resp=await fetch(CLOUD_DATA_URL+cacheBust,{cache:'no-store'});
-    if(!resp.ok){
-      if(resp.status===404){
-        alert('❌ No cloud data found.\n\nNo data.json file exists on GitHub yet. A coordinator needs to first tap "Generate data.json" and upload it to the repo.');
-      } else {
-        alert('❌ Could not load from cloud.\n\nServer returned: '+resp.status+'\n\nCheck your internet connection and try again.');
-      }
-      return;
-    }
-    const text=await resp.text();
-    let parsed;
-    try{parsed=JSON.parse(text);}catch(e){
-      alert('❌ Cloud data is corrupted.\n\nThe data.json file on GitHub is not valid. A coordinator needs to regenerate and re-upload it.');
-      return;
-    }
-    if(!parsed.S||!parsed.S.players){
-      alert('❌ Cloud data missing players.\n\nThe data.json file does not contain valid ladder data.');
-      return;
-    }
-    // Apply the data
-    S=parsed.S;
-    sess=parsed.sess||sess;
-    save();
-    renderAll();
-    alert('✅ Cloud data loaded!\n\n'+(S.players?S.players.length:0)+' players restored.\n\nPlayers, ladder rankings, and history are now in sync with GitHub.');
-  }catch(err){
-    alert('❌ Error loading from cloud:\n\n'+err.message+'\n\nCheck your internet connection.');
-  }
-}
+async function loadFromCloud(){clubSyncOpen();}
 let clubResetMode=null;
 function resetPointsOnly(){clubRequestReset('points');}
 function resetEverything(){clubRequestReset('everything');}
@@ -3854,13 +3739,7 @@ function applyLoadedBackup(data){
   if(!S.cfg.courtNames)S.cfg.courtNames=[...DEFAULT_CFG.courtNames];
   if(!S.weeks)S.weeks=[];
   if(!S.log)S.log=[];
-  S.players.forEach(p=>{if(p.level!=='upper'&&p.level!=='lower')p.level='lower';});
-  S.weeks.forEach(w=>{
-    if(!w.sessions)w.sessions={};
-    ['wed','sat'].forEach(d=>{['lower','upper'].forEach(lv=>{const key=d+'_'+lv;if(!w.sessions[key])w.sessions[key]={done:false,present:[]};});});
-    if(w.wedDone&&!w.sessions.wed_lower.done)w.sessions.wed_lower={done:true,present:w.wedPresent||[]};
-    if(w.satDone&&!w.sessions.sat_lower.done)w.sessions.sat_lower={done:true,present:w.satPresent||[]};
-  });
+  clubMigrateLadders();
   save();renderAll();
 }
 
@@ -3931,17 +3810,12 @@ function loadBackup(){
 /* ====== Dashboard ====== */
 function updateDashboard(){
   document.getElementById('stat-players').textContent=String(S.players.length);
-  const upperTop=[...S.players].filter(p=>playerLevel(p)==='upper').sort((a,b)=>(b.pts||0)-(a.pts||0))[0];
-  const lowerTop=[...S.players].filter(p=>playerLevel(p)==='lower').sort((a,b)=>(b.pts||0)-(a.pts||0))[0];
-  const upName=upperTop?upperTop.name.split(' ')[0]:'—';
-  const loName=lowerTop?lowerTop.name.split(' ')[0]:'—';
-  const leaderEl=document.getElementById('stat-leader');
-  leaderEl.innerHTML=`<span style="font-size:14px;display:block;line-height:1.2;">Men: ${esc(upName)}</span><span style="font-size:14px;display:block;line-height:1.2;color:var(--text-muted)">Women: ${esc(loName)}</span>`;
+  document.getElementById('stat-leader').textContent='4';
   document.getElementById('stat-weeks').textContent=String(S.weeks.length);
   let sessionCount=0;
   S.weeks.forEach(w=>{
     if(w.sessions){
-      ['wed_lower','wed_upper','sat_lower','sat_upper'].forEach(k=>{if(w.sessions[k]&&w.sessions[k].done)sessionCount++;});
+      Object.values(w.sessions).forEach(slot=>{if(slot.done)sessionCount++;});
     }
   });
   document.getElementById('stat-sessions').textContent=String(sessionCount);
@@ -4083,7 +3957,7 @@ finishSession=function(){
  if(!week||week.sessions[key]?.done){alert('This session has already been completed or its week is missing.');return;}
  clubObservePoints();
  const result=clubResults(sess),id=clubId();
- const log=clubLog(sess.day==='wed'?'1st Session':'2nd Session',sess.sessionLevel,week,result.summary);
+ const log=clubLog(lvl(sess.sessionLevel).schedule,sess.sessionLevel,week,result.summary);
  log.date=sess.sessionDate||log.date;log.sessionDate=sess.sessionDate||log.date;
  log._clubEvent=id;log.present=sess.present.length;log.courtNames=clubClone(sess.courtNames||S.cfg.courtNames);
  const e={id,kind:'session',active:true,createdAt:new Date().toISOString(),weekId:week._clubId,key,level:sess.sessionLevel,roster:clubRoster(sess.sessionLevel),snapshot:clubSnapshot(),ops:result.ops,log,audit:[]};
@@ -4092,21 +3966,13 @@ finishSession=function(){
  clubReplay();sess.lastSummary=clubClone(e.log.summary);sess.lastEventId=id;sess.phase=4;
  save();renderAll();renderSession();
 };
-applyPenalty=function(wi,level){
- const w=S.weeks[wi];if(!w||w['penalty_'+level])return;
- clubObservePoints();const seen=new Set([...(w.sessions['wed_'+level].present||[]),...(w.sessions['sat_'+level].present||[])]),ops=[],summary=[];
- S.players.forEach((p,i)=>{if(playerLevel(p)===level&&!seen.has(i)){ops.push({id:p._clubId,delta:-S.cfg.absentPenalty});summary.push({playerId:p._clubId,name:p.name,total:-S.cfg.absentPenalty,breakdown:'missed both sessions'});}});
- const id=clubId(),log=clubLog('Absence penalty',level,w,summary);log._clubEvent=id;
- S._clubHistory.events.push({id,kind:'penalty',active:true,createdAt:new Date().toISOString(),weekId:w._clubId,level,ops,log,audit:[]});w['penalty_'+level]=true;
- clubReplay();save();renderAll();renderSession();
-};
 let clubDetail=null;
 redoSession=function(wi,day,level){clubDetail={wi,day,level};renderSession();};
 function clubEventControls(id){return '<div class="btn-row"><button class="btn btn-primary" onclick="clubEdit(\''+id+'\')">Edit saved scores</button><button class="btn btn-danger" onclick="clubUndo(\''+id+'\')">Undo session</button></div>';}
 function clubRenderDetail(){
  const {wi,day,level}=clubDetail,w=S.weeks[wi],slot=w?.sessions[day+'_'+level],e=slot?.eventId?clubFind(slot.eventId):null;
- const log=e?.log||S.log.find(l=>l.weekLabel===w?.label&&(l.level||'lower')===level&&(l.day===(day==='wed'?'1st Session':'2nd Session')||l.day===(day==='wed'?'Wednesday':'Saturday')));
- document.getElementById('session-area').innerHTML='<div class="card"><div class="mini-label">Completed session</div><h3>'+esc(w?.label||'')+' · '+esc(lvl(level).label)+'</h3><p class="club-helper">'+(day==='wed'?'1st Session':'2nd Session')+'</p>'+(e?clubEventControls(e.id):'<p class="club-helper">This older session has no saved round scores or exact point baseline. Safe automatic edit/undo is unavailable. Existing history is preserved; use Players → Edit points for a documented adjustment.</p>')+'<div class="club-summary">'+(log?.summary||[]).map(r=>'<div><span>'+esc(r.name)+'</span><strong>'+(r.total>=0?'+':'')+r.total+'</strong></div>').join('')+'</div><button class="btn" onclick="clubCloseDetail()">Back to events</button></div>';
+ const log=e?.log||S.log.find(l=>l.weekLabel===w?.label&&(l.level||'lower')===level&&(l.day===(lvl(level).schedule)||l.day===(day==='wed'?'Wednesday':'Saturday')));
+ document.getElementById('session-area').innerHTML='<div class="card"><div class="mini-label">Completed session</div><h3>'+esc(w?.label||'')+' · '+esc(lvl(level).label)+'</h3><p class="club-helper">'+(lvl(level).schedule)+'</p>'+(e?clubEventControls(e.id):'<p class="club-helper">This older session has no saved round scores or exact point baseline. Safe automatic edit/undo is unavailable. Existing history is preserved; use Players → Edit points for a documented adjustment.</p>')+'<div class="club-summary">'+(log?.summary||[]).map(r=>'<div><span>'+esc(r.name)+'</span><strong>'+(r.total>=0?'+':'')+r.total+'</strong></div>').join('')+'</div><button class="btn" onclick="clubCloseDetail()">Back to events</button></div>';
 }
 function clubCloseDetail(){clubDetail=null;renderSession();}
 function clubHasDraft(){return !!sess._editId||(sess.phase>0&&sess.phase<4)||(sess.phase===0&&sess.weekIdx>=0&&sess.present?.length>0);}
@@ -4296,6 +4162,8 @@ async function clubSyncAttach(session){
  document.getElementById('club-sync-account').textContent='Signed in as '+user.email;
  let saved=null;try{saved=JSON.parse(localStorage.getItem(CLUB_SYNC_STORAGE));}catch(e){}
  if(saved&&saved.user!==user.id)saved=null;
+ const upgrading=!!saved?.meta?.linked&&saved.meta.base?.S?.ladderSchemaVersion!==2;
+ if(saved&&saved.payload?.S?.ladderSchemaVersion!==2){localStorage.setItem('levelup-sync-before-four-ladders',JSON.stringify(saved));saved=null;}
  clubHistory();const local=clubSyncPayload();
  clubSync=new LevelUpSync({local,meta:saved?.meta,
   id:()=>crypto.randomUUID(),
@@ -4307,6 +4175,7 @@ async function clubSyncAttach(session){
    if(!payload?.S||!Array.isArray(payload.S.players)||!Array.isArray(payload.S.weeks)||!payload.sess)throw Error('Invalid cloud data');
    // Do not replace an input while the coordinator is typing.
    const active=document.activeElement;if(active&&['INPUT','TEXTAREA','SELECT'].includes(active.tagName)&&!active.closest('#club-sync-card'))throw Error('Waiting for typing to finish');
+   if(payload.S.ladderSchemaVersion!==2)throw Error('The online ladder is being updated. Try again shortly.');
    const nextS=clubClone(payload.S);if(S._lastBackupAt)nextS._lastBackupAt=S._lastBackupAt;
    localStorage.setItem(STORAGE_KEY,JSON.stringify(nextS));localStorage.setItem(SESS_KEY,JSON.stringify(payload.sess));
    S=nextS;sess=clubClone(payload.sess);clubDetail=null;clubCloseWeek();renderAll();renderSession();renderSettings();renderLog();
@@ -4316,7 +4185,7 @@ async function clubSyncAttach(session){
  if(saved?.payload&&saved.meta?.linked&&!sameSyncPayload(saved.payload,saved.meta.base)&&sameSyncPayload(local,saved.meta.base)){
   S=clubClone(saved.payload.S);sess=clubClone(saved.payload.sess);clubSync.local=clubClone(saved.payload);await storageSet(STORAGE_KEY,JSON.stringify(S));await storageSet(SESS_KEY,JSON.stringify(sess));renderAll();renderSession();
  }
- clubSync.save();await clubSync.cycle();
+ if(upgrading){await clubSync.useOnline();}else{clubSync.save();await clubSync.cycle();}
  clubSyncChannel=clubCloud.channel('levelup-state').on('postgres_changes',{event:'UPDATE',schema:'public',table:'levelup_state',filter:'id=eq.levelup'},()=>clubSyncSchedule(50)).subscribe(status=>{if(status==='SUBSCRIBED')clubSyncSchedule(0);});
 }
 function sameSyncPayload(a,b){return JSON.stringify(a)===JSON.stringify(b);}

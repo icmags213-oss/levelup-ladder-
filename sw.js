@@ -1,14 +1,14 @@
 // LevelUp Pickleball Ladder — service worker
 // Caches the app so it works offline and loads instantly.
 // Bump this version number whenever you upload a new index.html or other files.
-const VERSION = 'v22-sync-1';
+const VERSION = 'v23-four-ladders-1';
 const CACHE_NAME = `levelup-ladder-${VERSION}`;
 const APP_SHELL = [
   './',
   './index.html',
   './supabase-2.102.0.js',
   './sync-core.js',
-  './public-template.js',
+  './public-template.js?v=23',
   './club-asset-3.png',
   './club-asset-2.png',
   './club-asset-1.webp',
