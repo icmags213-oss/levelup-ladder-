@@ -4168,7 +4168,7 @@ async function clubSyncAttach(session){
  clubSync=new LevelUpSync({local,meta:saved?.meta,
   id:()=>crypto.randomUUID(),
   read:async()=>{const {data,error}=await clubCloud.from('levelup_state').select('*').eq('id','levelup').single();if(error){if(error.code==='PGRST116')error.code='42501';throw error;}return data;},
-  write:async p=>{const {data,error}=await clubCloud.rpc('levelup_save',{expected_revision:p.revision,next_mutation:p.id,next_payload:p.payload});if(error)throw error;return data;},
+  write:async p=>{const {data,error}=await clubCloud.rpc('levelup_save_v2',{expected_revision:p.revision,next_mutation:p.id,next_payload:p.payload});if(error)throw error;return data;},
   persist:(meta,payload)=>{if(epoch!==clubSyncEpoch)return;try{localStorage.setItem(CLUB_SYNC_STORAGE,JSON.stringify({user:user.id,meta,payload}));}catch(cause){const e=new Error('Device storage is full');e.code='STORAGE';throw e;}},
   apply:async payload=>{
    if(epoch!==clubSyncEpoch)throw Error('Account changed');
