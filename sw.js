@@ -1,11 +1,18 @@
 // LevelUp Pickleball Ladder — service worker
 // Caches the app so it works offline and loads instantly.
 // Bump this version number whenever you upload a new index.html or other files.
-const VERSION = 'v21-11-courtclub-1';
+const VERSION = 'v22-sync-1';
 const CACHE_NAME = `levelup-ladder-${VERSION}`;
 const APP_SHELL = [
   './',
   './index.html',
+  './supabase-2.102.0.js',
+  './sync-core.js',
+  './public-template.js',
+  './club-asset-3.png',
+  './club-asset-2.png',
+  './club-asset-1.webp',
+  './club-asset-0.ttf',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -41,6 +48,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  const url=new URL(req.url);
+  if(url.origin!==self.location.origin||req.headers.has('authorization'))return;
 
   const isHTML =
     req.mode === 'navigate' ||
