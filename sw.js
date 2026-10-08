@@ -1,7 +1,7 @@
 // LevelUp Pickleball Ladder — service worker
 // Caches the app so it works offline and loads instantly.
 // Bump this version number whenever you upload a new index.html or other files.
-const VERSION = 'v14';
+const VERSION = 'v21-11-courtclub-1';
 const CACHE_NAME = `levelup-ladder-${VERSION}`;
 const APP_SHELL = [
   './',
@@ -9,7 +9,12 @@ const APP_SHELL = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './icon-maskable-512.png'
+  './icon-maskable-512.png',
+  './icon-v21-4-32.png',
+  './icon-v21-4-180.png',
+  './icon-v21-4-192.png',
+  './icon-v21-4-512.png',
+  './icon-v21-4-maskable-512.png'
 ];
 
 // Install — pre-cache the app shell
