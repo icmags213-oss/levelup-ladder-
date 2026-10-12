@@ -796,7 +796,24 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
  #tab-session .club-session-card>.club-session-action{grid-column:1 / -1;grid-row:2;align-self:end;width:100%;box-sizing:border-box}
  #tab-session .club-session-kicker,#tab-session .day-btn-label,#tab-session .day-btn-sub{line-height:1.4}
 }
-@media(max-width:480px){#tab-session .day-row{grid-template-columns:minmax(0,1fr)}#tab-session .club-session-card>.club-session-copy{min-height:64px}}
+@media(max-width:480px){
+ #tab-session .day-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #tab-session .day-btn.club-session-card{grid-template-columns:26px minmax(0,1fr);column-gap:7px;row-gap:10px;padding:12px 9px}
+ #tab-session .club-session-card>.club-session-icon{width:26px;height:26px}
+ #tab-session .club-session-icon svg{width:19px;height:19px}
+ #tab-session .club-session-card>.club-session-copy{min-height:76px;gap:3px}
+ #tab-session .club-session-kicker{font-size:8px;letter-spacing:.3px}
+ #tab-session .club-session-card .day-btn-label{font-size:12px;letter-spacing:-.2px}
+ #tab-session .club-session-card .day-btn-sub{font-size:10px}
+ #tab-session .club-session-card>.club-session-action{font-size:10px;gap:4px;padding-top:9px}
+ #tab-session .club-session-action svg{width:15px;height:15px;flex-shrink:0}
+}
+@media(max-width:360px){
+ #tab-session .day-btn.club-session-card{grid-template-columns:22px minmax(0,1fr);column-gap:5px;padding:10px 7px}
+ #tab-session .club-session-card>.club-session-icon{width:22px;height:26px}
+ #tab-session .club-session-card .day-btn-label{font-size:11px}
+ #tab-session .club-session-kicker{font-size:7.5px;letter-spacing:0}
+}
 </style></head>
 <body>
 
