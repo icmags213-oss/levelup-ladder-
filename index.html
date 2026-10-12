@@ -825,6 +825,25 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 .club-catchup details{border-top:1px solid var(--border);padding:12px 0}.club-catchup summary{cursor:pointer;font-weight:700}
 .club-catchup-row{padding:14px 0;border-bottom:1px solid var(--border)}.club-catchup-row p{font-size:13px;line-height:1.6;margin:8px 0}
 .club-catchup-row input{max-width:110px;margin:8px}.club-catchup .btn-row{margin-top:10px}
+</style><style id="club-clean-players">
+#tab-players .club-add-player{padding:22px;margin-bottom:20px}#tab-players .club-add-player h3{font-size:20px;margin:6px 0 18px}
+.club-add-fields{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.1fr) minmax(100px,.45fr);gap:14px}
+.club-add-fields label,.club-player-edit-fields>label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:600;min-width:0}
+.club-add-fields input,.club-add-fields select{width:100%;min-width:0;box-sizing:border-box}.club-field-optional{font-size:10px;font-weight:400;color:var(--text-muted)}
+.club-add-hint{font-size:12px;margin:10px 0 16px}.club-add-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--border);padding-top:16px}
+.club-provisional-check{display:flex;align-items:center;gap:10px;cursor:pointer}.club-provisional-check input{width:18px;height:18px;accent-color:var(--green);flex-shrink:0}.club-provisional-check strong{font-size:12px;display:block}.club-provisional-check small{font-size:11px;display:block;margin-top:4px;color:var(--text-muted)}
+#club-enroll-status:empty{display:none}#club-enroll-status{margin-top:12px}
+.club-roster-search{display:flex;align-items:center;gap:10px;margin:0 0 20px;padding:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.club-roster-search svg{width:19px;height:19px;flex-shrink:0;color:var(--text-muted)}#tab-players .club-roster-search input{flex:1;min-width:0;width:100%;border:0;background:transparent;min-height:46px;font-size:14px;box-shadow:none}.club-roster-search:focus-within{outline:2px solid var(--green);outline-offset:2px}.club-roster-search .btn{border:0;background:transparent;color:var(--text-muted)}
+#tab-players .player-card.club-player{display:block;padding:14px 16px;margin:0;border-radius:0;border-top:0;box-shadow:none}#tab-players .club-player:last-child{border-radius:0 0 8px 8px}
+.club-player-summary{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:12px;align-items:center}.club-player-summary .avatar{width:36px;height:36px;font-size:12px;box-shadow:none}
+.club-player-identity{min-width:0}.club-player-identity>strong{font-size:14px;overflow-wrap:anywhere}.club-player-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:11px;color:var(--text-muted)}
+.club-player-badge{display:inline-block;border-radius:4px;background:var(--surface-alt);padding:3px 6px;font-size:10px}.club-player-badge.is-provisional{border:1px solid var(--border);color:var(--green)}body.dark .club-player-badge.is-provisional{color:var(--lime)}
+.club-player-points{display:flex;align-items:baseline;gap:4px;white-space:nowrap}.club-player-points strong{font-size:20px}.club-player-points small{font-size:10px;color:var(--text-muted)}
+.club-player-quick-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end}.club-both-days{font-size:10px;color:var(--text-muted);padding:0 6px}
+.club-player-editor{margin-top:14px;padding:16px 0 0;border-top:1px solid var(--border)}.club-player-editor .club-rating-controls{border:0;padding:10px 0 14px;margin:0}.club-player-edit-fields{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.club-player-edit-fields>label{min-width:190px;max-width:100%}.club-player-edit-fields select{max-width:100%;width:100%}.club-player-edit-fields .btn-row{margin:0;gap:7px}.club-player-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+@media(max-width:650px){.club-add-fields{grid-template-columns:minmax(0,1fr) 100px}.club-add-fields>label:first-child{grid-column:1/-1}.club-add-footer{align-items:stretch;flex-direction:column}.club-add-footer>.btn{justify-content:center}.club-player-summary{grid-template-columns:32px minmax(0,1fr) auto;gap:10px}.club-player-quick-actions{grid-column:2/-1;justify-content:flex-start}.club-player-summary .avatar{width:32px;height:32px}.club-player-edit-fields{align-items:stretch;flex-direction:column}.club-player-editor .club-rating-controls{gap:8px}.club-player-editor-footer{align-items:flex-start}.club-player-editor-footer .club-helper{font-size:11px}#tab-players .club-add-player{padding:16px}.club-player-meta{gap:6px}}
+@media(max-width:350px){.club-add-fields{grid-template-columns:minmax(0,1fr)}.club-add-fields>label:first-child{grid-column:auto}}
 </style></head>
 <body>
 
@@ -930,24 +949,21 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 
   <!-- PLAYERS -->
   <div id="tab-players" class="panel">
-    <div class="card">
-      <div class="mini-label">Roster</div>
-      <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:10px;">Add a new player</h3>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <input type="text" id="new-name" placeholder="Player name" style="flex:1;min-width:180px;">
-        <select id="new-level" aria-label="Choose ladders" style="min-width:120px;max-width:100%;"><option value="both_upper">Both days · Men’s</option><option value="both_lower">Both days · Women’s</option><option value="upper">Tues Morning Men’s Ladder</option><option value="lower">Tues Morning Women’s Ladder</option><option value="wed_upper">Wed Evening Men’s Ladder</option><option value="wed_lower">Wed Evening Women’s Ladder</option></select>
-        <label class="club-helper">Estimated rating <input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5" style="width:100px" aria-label="New player estimated skill rating"></label>
-        <label class="club-helper"><input id="new-provisional" type="checkbox" checked> 3 provisional sessions per ladder</label>
-        <button class="btn btn-primary" onclick="addPlayer()">+ Add player</button>
+    <div class="card club-add-player">
+      <div class="mini-label">Roster</div><h3>Add a player</h3>
+      <div class="club-add-fields">
+        <label for="new-name">Player name<input type="text" id="new-name" placeholder="First and last name" autocomplete="off"></label>
+        <label for="new-level">Ladder<select id="new-level"><option value="both_upper">Both days · Men’s</option><option value="both_lower">Both days · Women’s</option><option value="upper">Tues Morning Men’s Ladder</option><option value="lower">Tues Morning Women’s Ladder</option><option value="wed_upper">Wed Evening Men’s Ladder</option><option value="wed_lower">Wed Evening Women’s Ladder</option></select></label>
+        <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
       </div>
+      <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
+      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" checked><span><strong>Provisional newcomer</strong><small>First 3 sessions in each ladder · catch-up points need your approval</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
+      <p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
     </div>
-    <p class="club-helper">Choose both days to add a player to Tuesday Morning and Wednesday Evening. Each ladder keeps its own points and results.</p><p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
-      <button class="btn btn-sm" id="player-search-toggle" onclick="togglePlayerSearch()" title="Search players">🔍</button>
-      <div id="player-search-box" style="display:none;flex:1;min-width:200px;position:relative;">
-        <input type="text" id="player-search-input" placeholder="Search players by name…" oninput="filterPlayerList(this.value)" style="width:100%;padding-right:36px;">
-        <button class="btn btn-sm" onclick="clearPlayerSearch()" title="Clear" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);padding:4px 8px;">✕</button>
-      </div>
+    <div id="player-search-box" class="club-roster-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+      <input type="search" id="player-search-input" placeholder="Search players…" aria-label="Search players" oninput="filterPlayerList(this.value)">
+      <button class="btn btn-sm" onclick="clearPlayerSearch()" aria-label="Clear player search">Clear</button>
     </div>
     <div id="player-list"></div>
   </div>
@@ -3128,17 +3144,20 @@ function renderPlayerList(){
         html+=ofLevel.map(({p,i})=>{
           const c=col(i);
           const isCoord=p.coordinator;
-          return`<div class="player-card">
-            <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
-            <span class="pname">${esc(p.name)}${isCoord?` <span style="font-size:11px;font-weight:600;color:#ef9f27;margin-left:4px;" title="Ladder coordinator">★ coordinator</span>`:''}</span>
-            <span class="ppts">${p.pts||0} pts</span>
-            ${clubRatingControls(p,i)}
-            <button class="btn btn-sm edit-btn" onclick="editPoints(${i})" title="Edit points">✎ pts</button>
-            <button class="btn btn-sm edit-btn" onclick="toggleCoordinator(${i})" title="${isCoord?'Remove coordinator flag':'Mark as ladder coordinator'}" style="${isCoord?'color:#ef9f27;':''}">★</button>
-            <select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)" style="max-width:230px">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label.replace('Tuesday Morning','Tues Morning').replace('Wednesday Evening','Wed Evening'))+'</option>').join('')}</select>
-            ${clubOtherDayExists(p)?'<span class="club-helper">Enrolled both days</span>':'<button class="btn btn-sm" onclick="clubAddOtherDay('+i+')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>'}
-            <button class="btn btn-sm edit-btn" onclick="editPlayerName(${i})" title="Edit name">⌨ name</button>
-            <button class="btn btn-sm btn-danger" onclick="removePlayer(${i})">🗑</button>
+          const expanded=!!p._clubId&&window._playerEditorId===p._clubId,provisional=clubIsProvisional(p),count=clubProvisionalCount(p);
+          return`<div class="player-card club-player">
+            <div class="club-player-summary">
+              <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
+              <div class="club-player-identity"><strong>${esc(p.name)}${isCoord?' <span title="Coordinator" aria-label="Coordinator">★</span>':''}</strong><div class="club-player-meta"><span>Rating <b>${clubRating(p.skillRating)??'—'}</b></span><span class="club-player-badge ${provisional?'is-provisional':''}">${provisional?'Provisional '+count+'/'+p.provisional.limit:'Established'}</span></div></div>
+              <div class="club-player-points"><strong>${p.pts||0}</strong><small>pts</small></div>
+              <div class="club-player-quick-actions">${clubOtherDayExists(p)?'<span class="club-both-days">Both days</span>':'<button class="btn btn-sm" onclick="clubAddOtherDay('+i+')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>'}<button class="btn btn-sm" aria-expanded="${expanded}" aria-controls="club-player-editor-${i}" onclick="clubTogglePlayerEditor(${i})">${expanded?'Done':'Edit'}</button></div>
+            </div>
+            <div id="club-player-editor-${i}" class="club-player-editor" ${expanded?'':'hidden'}>
+              <div class="mini-label">Edit player</div>
+              ${clubRatingControls(p,i)}
+              <div class="club-player-edit-fields"><label>Ladder<select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label.replace('Tuesday Morning','Tues Morning').replace('Wednesday Evening','Wed Evening'))+'</option>').join('')}</select></label><div class="btn-row"><button class="btn btn-sm" onclick="editPlayerName(${i})">Edit name</button><button class="btn btn-sm" onclick="editPoints(${i})">Edit points</button><button class="btn btn-sm" onclick="toggleCoordinator(${i})">${isCoord?'Remove coordinator':'Make coordinator'}</button></div></div>
+              <div class="club-player-editor-footer"><span class="club-helper">Changes save automatically.</span><button class="btn btn-sm btn-danger" onclick="removePlayer(${i})">Remove player</button></div>
+            </div>
           </div>`;
         }).join('');
       }
@@ -3150,6 +3169,8 @@ function renderPlayerList(){
   }
   el.innerHTML=html;
 }
+
+function clubTogglePlayerEditor(i){clubHistory();const id=S.players[i]?._clubId;window._playerEditorId=window._playerEditorId===id?null:id;renderPlayerList();}
 
 function togglePlayerGroup(level){
   if(!window._playerGroupOpen)window._playerGroupOpen={upper:false,lower:false};
@@ -3181,7 +3202,7 @@ function clearPlayerSearch(){
   const inp=document.getElementById('player-search-input');
   if(inp)inp.value='';
   const box=document.getElementById('player-search-box');
-  if(box)box.style.display='none';
+  if(box)box.style.display='';
   renderPlayerList();
 }
 
@@ -3597,6 +3618,25 @@ h4{font-size:13px;color:#1a2233;margin:18px 0 8px;}
 .club-catchup details{border-top:1px solid var(--border);padding:12px 0}.club-catchup summary{cursor:pointer;font-weight:700}
 .club-catchup-row{padding:14px 0;border-bottom:1px solid var(--border)}.club-catchup-row p{font-size:13px;line-height:1.6;margin:8px 0}
 .club-catchup-row input{max-width:110px;margin:8px}.club-catchup .btn-row{margin-top:10px}
+</style><style id="club-clean-players">
+#tab-players .club-add-player{padding:22px;margin-bottom:20px}#tab-players .club-add-player h3{font-size:20px;margin:6px 0 18px}
+.club-add-fields{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.1fr) minmax(100px,.45fr);gap:14px}
+.club-add-fields label,.club-player-edit-fields>label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:600;min-width:0}
+.club-add-fields input,.club-add-fields select{width:100%;min-width:0;box-sizing:border-box}.club-field-optional{font-size:10px;font-weight:400;color:var(--text-muted)}
+.club-add-hint{font-size:12px;margin:10px 0 16px}.club-add-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--border);padding-top:16px}
+.club-provisional-check{display:flex;align-items:center;gap:10px;cursor:pointer}.club-provisional-check input{width:18px;height:18px;accent-color:var(--green);flex-shrink:0}.club-provisional-check strong{font-size:12px;display:block}.club-provisional-check small{font-size:11px;display:block;margin-top:4px;color:var(--text-muted)}
+#club-enroll-status:empty{display:none}#club-enroll-status{margin-top:12px}
+.club-roster-search{display:flex;align-items:center;gap:10px;margin:0 0 20px;padding:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.club-roster-search svg{width:19px;height:19px;flex-shrink:0;color:var(--text-muted)}#tab-players .club-roster-search input{flex:1;min-width:0;width:100%;border:0;background:transparent;min-height:46px;font-size:14px;box-shadow:none}.club-roster-search:focus-within{outline:2px solid var(--green);outline-offset:2px}.club-roster-search .btn{border:0;background:transparent;color:var(--text-muted)}
+#tab-players .player-card.club-player{display:block;padding:14px 16px;margin:0;border-radius:0;border-top:0;box-shadow:none}#tab-players .club-player:last-child{border-radius:0 0 8px 8px}
+.club-player-summary{display:grid;grid-template-columns:36px minmax(0,1fr) auto auto;gap:12px;align-items:center}.club-player-summary .avatar{width:36px;height:36px;font-size:12px;box-shadow:none}
+.club-player-identity{min-width:0}.club-player-identity>strong{font-size:14px;overflow-wrap:anywhere}.club-player-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:11px;color:var(--text-muted)}
+.club-player-badge{display:inline-block;border-radius:4px;background:var(--surface-alt);padding:3px 6px;font-size:10px}.club-player-badge.is-provisional{border:1px solid var(--border);color:var(--green)}body.dark .club-player-badge.is-provisional{color:var(--lime)}
+.club-player-points{display:flex;align-items:baseline;gap:4px;white-space:nowrap}.club-player-points strong{font-size:20px}.club-player-points small{font-size:10px;color:var(--text-muted)}
+.club-player-quick-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end}.club-both-days{font-size:10px;color:var(--text-muted);padding:0 6px}
+.club-player-editor{margin-top:14px;padding:16px 0 0;border-top:1px solid var(--border)}.club-player-editor .club-rating-controls{border:0;padding:10px 0 14px;margin:0}.club-player-edit-fields{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.club-player-edit-fields>label{min-width:190px;max-width:100%}.club-player-edit-fields select{max-width:100%;width:100%}.club-player-edit-fields .btn-row{margin:0;gap:7px}.club-player-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+@media(max-width:650px){.club-add-fields{grid-template-columns:minmax(0,1fr) 100px}.club-add-fields>label:first-child{grid-column:1/-1}.club-add-footer{align-items:stretch;flex-direction:column}.club-add-footer>.btn{justify-content:center}.club-player-summary{grid-template-columns:32px minmax(0,1fr) auto;gap:10px}.club-player-quick-actions{grid-column:2/-1;justify-content:flex-start}.club-player-summary .avatar{width:32px;height:32px}.club-player-edit-fields{align-items:stretch;flex-direction:column}.club-player-editor .club-rating-controls{gap:8px}.club-player-editor-footer{align-items:flex-start}.club-player-editor-footer .club-helper{font-size:11px}#tab-players .club-add-player{padding:16px}.club-player-meta{gap:6px}}
+@media(max-width:350px){.club-add-fields{grid-template-columns:minmax(0,1fr)}.club-add-fields>label:first-child{grid-column:auto}}
 </style></head>
 <body>
 <div class="wrap">
@@ -4404,4 +4444,5 @@ load().then(clubSyncInit).catch(e=>clubSyncText('offline',e));
 
 </body>
 </html>
+
 
