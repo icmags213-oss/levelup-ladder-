@@ -818,6 +818,13 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 #tab-players #new-level,#tab-players .player-card select{
  font-family:var(--font-sans);font-size:12px;font-weight:600;letter-spacing:0;line-height:1.4;
 }
+</style><style id="club-provisional-style">
+.club-rating-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex-basis:100%;padding:8px 0;border-top:1px solid var(--border)}
+.club-rating-controls label{font-size:12px;font-weight:600}.club-rating-controls input{width:95px;margin-left:6px}
+.club-placement-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+.club-catchup details{border-top:1px solid var(--border);padding:12px 0}.club-catchup summary{cursor:pointer;font-weight:700}
+.club-catchup-row{padding:14px 0;border-bottom:1px solid var(--border)}.club-catchup-row p{font-size:13px;line-height:1.6;margin:8px 0}
+.club-catchup-row input{max-width:110px;margin:8px}.club-catchup .btn-row{margin-top:10px}
 </style></head>
 <body>
 
@@ -929,6 +936,8 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <input type="text" id="new-name" placeholder="Player name" style="flex:1;min-width:180px;">
         <select id="new-level" aria-label="Choose ladders" style="min-width:120px;max-width:100%;"><option value="both_upper">Both days · Men’s</option><option value="both_lower">Both days · Women’s</option><option value="upper">Tues Morning Men’s Ladder</option><option value="lower">Tues Morning Women’s Ladder</option><option value="wed_upper">Wed Evening Men’s Ladder</option><option value="wed_lower">Wed Evening Women’s Ladder</option></select>
+        <label class="club-helper">Estimated rating <input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5" style="width:100px" aria-label="New player estimated skill rating"></label>
+        <label class="club-helper"><input id="new-provisional" type="checkbox" checked> 3 provisional sessions per ladder</label>
         <button class="btn btn-primary" onclick="addPlayer()">+ Add player</button>
       </div>
     </div>
@@ -1307,7 +1316,7 @@ function showTab(t){
 
 /* ====== Court logic ====== */
 function makeCourts(present,sizes){
-  const sorted=[...present].sort((a,b)=>(S.players[b].pts||0)-(S.players[a].pts||0));
+  const sorted=clubSeedOrder(present);
   const courts=[];
   let cursor=0;
   if(sizes&&sizes.length){
@@ -1781,6 +1790,7 @@ function renderPlayerPicker(el){
     }
   }
 
+  html+=clubPlacementReview();
   html+=`<div class="btn-row">
     <button class="btn btn-primary" onclick="startR1()" ${presentCount<2?'disabled':''}>→ Start round 1</button>
     <button class="btn" onclick="backToWeeks()">Cancel</button>
@@ -3122,6 +3132,7 @@ function renderPlayerList(){
             <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
             <span class="pname">${esc(p.name)}${isCoord?` <span style="font-size:11px;font-weight:600;color:#ef9f27;margin-left:4px;" title="Ladder coordinator">★ coordinator</span>`:''}</span>
             <span class="ppts">${p.pts||0} pts</span>
+            ${clubRatingControls(p,i)}
             <button class="btn btn-sm edit-btn" onclick="editPoints(${i})" title="Edit points">✎ pts</button>
             <button class="btn btn-sm edit-btn" onclick="toggleCoordinator(${i})" title="${isCoord?'Remove coordinator flag':'Mark as ladder coordinator'}" style="${isCoord?'color:#ef9f27;':''}">★</button>
             <select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)" style="max-width:230px">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label.replace('Tuesday Morning','Tues Morning').replace('Wednesday Evening','Wed Evening'))+'</option>').join('')}</select>
@@ -3212,11 +3223,13 @@ function toggleCoordinator(i){
 function clubOtherDay(level){return level.startsWith('wed_')?level.slice(4):'wed_'+level;}
 function clubPlayerNameKey(name){return String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase();}
 function clubOtherDayExists(p){const other=clubOtherDay(playerLevel(p));return S.players.some(x=>playerLevel(x)===other&&clubPlayerNameKey(x.name)===clubPlayerNameKey(p.name));}
-function clubEnrollPlayer(name,levels){
+function clubEnrollPlayer(name,levels,options={}){
  const added=[];
  for(const level of levels){
   if(!LEVELS[level]||S.players.some(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name)))continue;
-  S.players.push({name,level,pts:0,_clubId:clubId()});added.push(level);
+  const player={name,level,pts:0,_clubId:clubId(),skillRating:clubRating(options.rating)};
+  if(options.provisional!==false)player.provisional={id:clubId(),limit:3};
+  S.players.push(player);added.push(level);
  }
  return added;
 }
@@ -3231,13 +3244,15 @@ async function addPlayer(){
  const inp=document.getElementById('new-name'),choice=document.getElementById('new-level').value;
  const name=inp.value.trim().replace(/\s+/g,' ');if(!name){document.getElementById('club-enroll-status').textContent='Enter a player name first.';return;}
  const levels=choice==='both_upper'?['upper','wed_upper']:choice==='both_lower'?['lower','wed_lower']:LEVELS[choice]?[choice]:[];
- const added=clubEnrollPlayer(name,levels);
- if(added.length)inp.value='';
+ const ratingValue=document.getElementById('new-rating').value;
+ if(ratingValue!==''&&clubRating(ratingValue)===null){document.getElementById('club-enroll-status').textContent='Enter a rating from 1.0 to 8.0, or leave it blank.';return;}
+ const added=clubEnrollPlayer(name,levels,{rating:ratingValue,provisional:document.getElementById('new-provisional').checked});
+ if(added.length){inp.value='';document.getElementById('new-rating').value='';}
  await clubSaveEnrollment(added);
 }
 async function clubAddOtherDay(i){
  const p=S.players[i];if(!p)return;
- const added=clubEnrollPlayer(p.name,[clubOtherDay(playerLevel(p))]);
+ const added=clubEnrollPlayer(p.name,[clubOtherDay(playerLevel(p))],{rating:p.skillRating});
  await clubSaveEnrollment(added);
 }
 function removePlayer(i){
@@ -3575,7 +3590,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .history-row .meta{font-size:12px;color:#697186;}
 h4{font-size:13px;color:#1a2233;margin:18px 0 8px;}
 </style>
-</head>
+<style id="club-provisional-style">
+.club-rating-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex-basis:100%;padding:8px 0;border-top:1px solid var(--border)}
+.club-rating-controls label{font-size:12px;font-weight:600}.club-rating-controls input{width:95px;margin-left:6px}
+.club-placement-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0;flex-wrap:wrap}
+.club-catchup details{border-top:1px solid var(--border);padding:12px 0}.club-catchup summary{cursor:pointer;font-weight:700}
+.club-catchup-row{padding:14px 0;border-bottom:1px solid var(--border)}.club-catchup-row p{font-size:13px;line-height:1.6;margin:8px 0}
+.club-catchup-row input{max-width:110px;margin:8px}.club-catchup .btn-row{margin-top:10px}
+</style></head>
 <body>
 <div class="wrap">
   <div class="hero">
@@ -3957,7 +3979,7 @@ function clubObservePoints(){
  return h;
 }
 function clubReplay(){
- const h=clubHistory(),points={...h.base};
+ const h=clubHistory(),points={...h.base},provisionalCounts={};
  for(const e of h.events){
   if(!e.active)continue;
   if(e.kind==='session')e.beforeRanks=clubRanks(e.roster,points);
@@ -3968,6 +3990,7 @@ function clubReplay(){
    if(e.log){const row=e.log.summary?.find(r=>r.playerId===op.id);if(row){row.beforePoints=before;row.afterPoints=after;row.total=clubRound(after-before);}}
   }
   if(e.kind==='session'){
+   clubReplayCatchup(e,points,provisionalCounts);
    e.afterRanks=clubRanks(e.roster,points);
    e.log.rankSnapshot=Object.fromEntries(e.roster.map(p=>[p.name,e.afterRanks[p.id]]));
    e.log.rankSnapshotIds={...e.afterRanks};
@@ -4003,6 +4026,7 @@ function clubResults(draft){
   }
   row.requestedTotal=clubRound(cfg.showUp+clubRound(perf));row.total=row.requestedTotal;
   row.breakdown='+'+cfg.showUp+' show-up · '+parts.join(' · ');
+  row.baseBreakdown=row.breakdown;
   summary.push(row);ops.push({id:p._clubId,delta:row.requestedTotal});
  }
  return{summary,ops};
@@ -4013,7 +4037,7 @@ function clubTouchAudit(e,action){(e.audit||(e.audit=[])).push({action,at:new Da
 const clubOldSave=save;
 save=async function(){clubObservePoints();return clubOldSave();};
 const clubOldStart=startSession;
-startSession=function(wi,day,level){clubHistory();clubDetail=null;clubOldStart(wi,day,level);sess.ruleSnapshot=clubClone(S.cfg);save();};
+startSession=function(wi,day,level){clubHistory();if(S._clubHistory.events.some(e=>e.active&&e.level===level&&e.catchup?.some(x=>x.decision===null))){alert('Review or skip the pending catch-up bonuses in History before starting the next session in this ladder.');showTab('log');return;}clubDetail=null;clubOldStart(wi,day,level);sess.ruleSnapshot=clubClone(S.cfg);save();};
 finishSession=function(){
  if(sess._editId){clubSaveCorrection();return;}
  if(sess.phase!==3)return;
@@ -4025,7 +4049,7 @@ finishSession=function(){
  const log=clubLog(lvl(sess.sessionLevel).schedule,sess.sessionLevel,week,result.summary);
  log.date=sess.sessionDate||log.date;log.sessionDate=sess.sessionDate||log.date;
  log._clubEvent=id;log.present=sess.present.length;log.courtNames=clubClone(sess.courtNames||S.cfg.courtNames);
- const e={id,kind:'session',active:true,createdAt:new Date().toISOString(),weekId:week._clubId,key,level:sess.sessionLevel,roster:clubRoster(sess.sessionLevel),snapshot:clubSnapshot(),ops:result.ops,log,audit:[]};
+ const e={id,kind:'session',entryProfiles:clubEntryProfiles(),catchupDecisions:{},active:true,createdAt:new Date().toISOString(),weekId:week._clubId,key,level:sess.sessionLevel,roster:clubRoster(sess.sessionLevel),snapshot:clubSnapshot(),ops:result.ops,log,audit:[]};
  S._clubHistory.events.push(e);
  week.sessions[key]={done:true,sessionDate:sess.sessionDate,present:sess.present.filter(pi=>!(sess.fillIns||[]).includes(pi)),eventId:id};
  clubReplay();sess.lastSummary=clubClone(e.log.summary);sess.lastEventId=id;sess.phase=4;
@@ -4071,7 +4095,7 @@ function clubSaveCorrection(){
  const e=clubFind(sess._editId);if(!e||!e.active)return;
  if(sess.scoresheet){alert('Apply or cancel the open scoresheet first.');return;}
  if(!confirm('Save these corrected scores? This session and all later point totals will be recalculated. The previous scores remain in the change history.'))return;
- clubObservePoints();clubTouchAudit(e,'Scores corrected');const result=clubResults(sess);
+ clubObservePoints();clubTouchAudit(e,'Scores corrected');clubInvalidateCatchup(e.id);const result=clubResults(sess);
  e.snapshot=clubSnapshot();e.ops=result.ops;e.log.summary=result.summary;e.correctedAt=new Date().toISOString();e.log.correctedAt=e.correctedAt;
  const back=sess._returnSession;clubReplay();sess=back||{phase:0,weekIdx:-1,present:[]};
  if(sess.lastEventId===e.id)sess.lastSummary=clubClone(e.log.summary);
@@ -4083,7 +4107,7 @@ function clubUndo(id){
  const originalWeek=S.weeks.find(w=>w._clubId===e.weekId);
  if(originalWeek?.['penalty_'+e.level]&&!S._clubHistory.events.some(p=>p.active&&p.kind==='penalty'&&p.weekId===e.weekId&&p.level===e.level)){alert('This week has a legacy penalty without an exact reversal record. You can edit the saved scores, but automatic undo is unavailable for this session.');return;}
  if(!confirm('Undo this session? Its attendance and point effects will be removed, later totals recalculated, and any recorded absence penalty for this week/ladder reversed. You can restore the session from History.'))return;
- clubObservePoints();clubTouchAudit(e,'Session undone');e.active=false;
+ clubObservePoints();clubTouchAudit(e,'Session undone');clubInvalidateCatchup(e.id);e.active=false;
  const w=S.weeks.find(w=>w._clubId===e.weekId);if(w)w.sessions[e.key]={done:false,present:[]};
  e.undonePenalties=[];
  for(const p of S._clubHistory.events){if(p.kind==='penalty'&&p.active&&p.weekId===e.weekId&&p.level===e.level){clubTouchAudit(p,'Reversed with session');p.active=false;e.undonePenalties.push(p.id);}}
@@ -4099,7 +4123,7 @@ function clubRestore(id){
  if(!w||w.sessions[e.key]?.done){alert('The original week is missing or this session slot has already been used.');return;}
  let d;try{d=clubRemap(e.snapshot);}catch(err){alert(err.message);return;}
  if(!confirm('Restore this session with its last saved scores? Later point totals will be recalculated. Absence penalties can be reapplied separately after checking attendance.'))return;
- clubObservePoints();clubTouchAudit(e,'Session restored');e.active=true;
+ clubObservePoints();clubTouchAudit(e,'Session restored');clubInvalidateCatchup(e.id);e.active=true;
  w.sessions[e.key]={done:true,present:d.present.filter(i=>!d.fillIns.includes(i)),eventId:e.id};
  clubReplay();save();renderAll();renderLog();renderSession();
 }
@@ -4115,6 +4139,7 @@ renderSession=function(){
   clubOldRenderSession();
   if(sess.phase===4&&sess.lastEventId&&clubFind(sess.lastEventId)?.active)document.getElementById('session-area').insertAdjacentHTML('beforeend','<div class="card">'+clubEventControls(sess.lastEventId)+'</div>');
  }
+ document.getElementById('session-area').insertAdjacentHTML('beforeend',clubCatchupCards(sess.sessionLevel||null));
  clubMobileState();
 };
 const clubOldShowTab=showTab;
@@ -4127,7 +4152,7 @@ function clubMobileState(){
 const clubOldRenderLog=renderLog;
 renderLog=function(){clubOldRenderLog();const events=clubHistory().events.filter(e=>e.kind==='session');if(!events.length)return;
  const h='<div class="card club-change-history"><h3>Session change history</h3>'+events.slice().reverse().map(e=>'<div class="club-audit-row"><strong>'+esc(e.log.weekLabel)+' · '+esc(e.log.day)+' · '+esc(lvl(e.level).label)+'</strong><div class="club-helper">'+(e.active?'Recorded':'Undone')+(e.correctedAt?' · corrected '+esc(new Date(e.correctedAt).toLocaleString()):'')+'</div>'+(e.active?'<button class="btn btn-sm" onclick="clubEdit(\''+e.id+'\')">Edit scores</button> <button class="btn btn-sm btn-danger" onclick="clubUndo(\''+e.id+'\');renderLog()">Undo</button>':'<button class="btn btn-sm" onclick="clubRestore(\''+e.id+'\')">Restore session</button>')+(e.audit?.length?'<details><summary>'+e.audit.length+' change'+(e.audit.length===1?'':'s')+'</summary>'+e.audit.map(a=>'<div class="club-helper">'+esc(a.action)+' · '+esc(new Date(a.at).toLocaleString())+'<br>'+a.summary.map(r=>esc(r.name)+': '+(r.wins??0)+'W/'+(r.losses??0)+'L · '+r.total+' pts').join(' · ')+'</div>').join('')+'</details>':'')+'</div>').join('')+'</div>';
- document.getElementById('log-area').insertAdjacentHTML('beforeend',h);
+ document.getElementById('log-area').insertAdjacentHTML('beforeend',h+clubCatchupCards(null)+clubCatchupAuditHtml());
 };
 /* Persist scoresheets and update only their tally while typing, retaining focus. */
 const clubOldOpenSheet=openScoresheet;
@@ -4162,6 +4187,80 @@ buildStandingsHtml=function(payload){
 if(window.visualViewport){
  const clubViewport=()=>{const v=window.visualViewport;document.documentElement.style.setProperty('--club-keyboard-inset',Math.max(0,window.innerHeight-v.height-v.offsetTop)+'px');};
  window.visualViewport.addEventListener('resize',clubViewport);window.visualViewport.addEventListener('scroll',clubViewport);clubViewport();
+}
+
+/* Club-estimated ratings and coordinator-approved provisional credit. */
+function clubRating(v){if(v===''||v==null)return null;const n=Number(v);return Number.isFinite(n)&&n>=1&&n<=8?Math.round(n*10)/10:null;}
+function clubProvisionalCount(p){if(!p.provisional)return 0;return clubHistory().events.filter(e=>e.active&&e.kind==='session'&&e.entryProfiles?.[p._clubId]?.windowId===p.provisional.id&&e.log.summary.some(r=>r.playerId===p._clubId&&!r.fillIn&&(r.wins+r.losses)>0)).length;}
+function clubIsProvisional(p){return !!p.provisional&&clubProvisionalCount(p)<p.provisional.limit;}
+function clubMedian(values){if(!values.length)return null;const s=values.slice().sort((a,b)=>a-b),i=Math.floor(s.length/2);return s.length%2?s[i]:(s[i-1]+s[i])/2;}
+function clubSetRating(i,value,input){const p=S.players[i];if(!p)return;const rating=clubRating(value);if(value!==''&&rating===null){input?.setCustomValidity('Enter a rating from 1.0 to 8.0.');input?.reportValidity();return;}input?.setCustomValidity('');p.skillRating=rating;save();}
+function clubProvisionalAction(i,action){
+ const p=S.players[i];if(!p)return;
+ if(clubHasDraft()){alert('Finish or cancel the current session before changing provisional status.');return;}
+ if(action==='start')p.provisional={id:clubId(),limit:3};
+ if(action==='extend'&&p.provisional)p.provisional.limit=Math.max(p.provisional.limit,clubProvisionalCount(p))+1;
+ if(action==='end'&&p.provisional)p.provisional.limit=clubProvisionalCount(p);
+ save();renderAll();
+}
+function clubRatingControls(p,i){
+ const count=clubProvisionalCount(p),active=clubIsProvisional(p);
+ return '<div class="club-rating-controls"><label>Skill rating <input type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5" aria-label="Estimated skill rating for '+esc(p.name)+'" value="'+(clubRating(p.skillRating)??'')+'" onchange="clubSetRating('+i+',this.value,this)"></label><span class="club-helper">'+(p.provisional?(active?'Provisional: ':'Completed: ')+Math.min(count,p.provisional.limit)+' / '+p.provisional.limit+' sessions':'Established player')+'</span>'+(p.provisional?'<button class="btn btn-sm" onclick="clubProvisionalAction('+i+',\'extend\')">+1 provisional session</button>':'<button class="btn btn-sm" onclick="clubProvisionalAction('+i+',\'start\')">Start provisional</button>')+(active?'<button class="btn btn-sm" onclick="clubProvisionalAction('+i+',\'end\')">End provisional</button>':'')+'</div>';
+}
+function clubSeedOrder(present){
+ const regular=present.filter(i=>!clubIsProvisional(S.players[i]));
+ const score=i=>{const p=S.players[i],rating=clubRating(p.skillRating);if(!clubIsProvisional(p)||rating===null)return p.pts||0;
+ const peers=regular.filter(j=>playerLevel(S.players[j])===playerLevel(p)&&clubRating(S.players[j].skillRating)!==null).sort((a,b)=>Math.abs(S.players[a].skillRating-rating)-Math.abs(S.players[b].skillRating-rating)).slice(0,3);
+ return peers.length?clubMedian(peers.map(j=>S.players[j].pts||0)):p.pts||0;};
+ const order=present.slice().sort((a,b)=>score(b)-score(a)||present.indexOf(a)-present.indexOf(b));
+ const overrides=present.filter(i=>clubIsProvisional(S.players[i])&&Number.isInteger(sess.seedPositions?.[S.players[i]._clubId])).sort((a,b)=>sess.seedPositions[S.players[a]._clubId]-sess.seedPositions[S.players[b]._clubId]);
+ for(const i of overrides){order.splice(order.indexOf(i),1);order.splice(Math.max(0,Math.min(order.length,sess.seedPositions[S.players[i]._clubId]-1)),0,i);}
+ return order;
+}
+function clubSetSeed(i,v){sess.seedPositions=sess.seedPositions||{};const id=S.players[i]._clubId;if(v==='')delete sess.seedPositions[id];else sess.seedPositions[id]=Number(v);save();renderSession();}
+function clubPlacementReview(){
+ const newcomers=(sess.present||[]).filter(i=>clubIsProvisional(S.players[i]));if(!newcomers.length)return '';
+ const order=clubSeedOrder(sess.present);
+ return '<div class="card"><h3>Review newcomer placement</h3><p class="club-helper">Regular players stay ordered by ladder points. Rated newcomers are placed near the three closest rated regulars. Without rated regulars, points order is used. Review the court preview and adjust below. No points are awarded for placement.</p>'+newcomers.map(i=>{const p=S.players[i],rank=order.indexOf(i)+1;return '<label class="club-placement-row">'+esc(p.name)+' · rating '+(p.skillRating??'not set')+'<select aria-label="Starting position for '+esc(p.name)+'" onchange="clubSetSeed('+i+',this.value)"><option value="">Suggested position '+rank+'</option>'+order.map((j,k)=>'<option value="'+(k+1)+'" '+(sess.seedPositions?.[p._clubId]===k+1?'selected':'')+'>Position '+(k+1)+'</option>').join('')+'</select></label>';}).join('')+'</div>';
+}
+function clubEntryProfiles(){return Object.fromEntries(S.players.map(p=>[p._clubId,{name:p.name,rating:clubRating(p.skillRating),windowId:p.provisional?.id||null,limit:p.provisional?.limit||0}]));}
+function clubReplayCatchup(e,points,counts){
+ if(!e.entryProfiles)return;
+ const rows=e.log.summary.filter(r=>!r.fillIn&&(r.wins+r.losses)>0),provisional=new Map();
+ for(const r of rows){const profile=e.entryProfiles[r.playerId];if(!profile?.windowId)continue;const key=r.playerId+':'+profile.windowId;counts[key]=(counts[key]||0)+1;if(counts[key]<=profile.limit)provisional.set(r.playerId,counts[key]);}
+ const normalPoints={...points};e.catchup=[];
+ for(const r of rows){
+  const earned=r.total;r.normalTotal=earned;r.catchupBonus=0;r.breakdown=r.baseBreakdown||r.breakdown;
+  if(!provisional.has(r.playerId))continue;
+  const index=e.snapshot.playerIds.indexOf(r.playerId),peerIds=new Set();
+  for(const round of ['r1','r2'])for(const court of e.snapshot[round+'courts']||[]){if(court.includes(index))for(const j of court){const id=e.snapshot.playerIds[j];if(id!==r.playerId&&rows.some(x=>x.playerId===id)&&!provisional.has(id))peerIds.add(id);}}
+  const peers=[...peerIds].map(id=>({id,name:e.entryProfiles[id]?.name||id,points:clubRound(normalPoints[id])}));
+  const reference=peers.length>=2?clubMedian(peers.map(p=>p.points)):null,afterEarned=clubRound(normalPoints[r.playerId]);
+  const suggestion=reference===null?0:Math.floor(Math.max(0,reference-afterEarned)*5)/10;
+  const decision=e.catchupDecisions?.[r.playerId];const approved=decision==null?0:Math.min(suggestion,Math.max(0,clubRound(decision)));
+  const item={id:r.playerId,name:r.name,ordinal:provisional.get(r.playerId),limit:e.entryProfiles[r.playerId].limit,earned,afterEarned,reference,suggestion,approved,decision:decision??null,peers,wins:r.wins,losses:r.losses};e.catchup.push(item);
+  points[r.playerId]=clubRound(afterEarned+approved);r.catchupBonus=approved;r.total=clubRound(earned+approved);r.afterPoints=points[r.playerId];r.breakdown=(r.baseBreakdown||r.breakdown)+' · Catch-up: +'+approved+(decision==null?' (awaiting review)':' (reviewed)');
+ }
+}
+function clubInvalidateCatchup(fromId){const level=clubFind(fromId)?.level;let found=false;for(const e of clubHistory().events){if(e.id===fromId)found=true;if(found&&e.level===level&&e.kind==='session'&&e.catchupDecisions){(e.catchupAudit||(e.catchupAudit=[])).push({at:new Date().toISOString(),action:'Reopened after session change',decisions:clubClone(e.catchupDecisions)});e.catchupDecisions={};}}}
+function clubCatchupCards(level){
+ const events=clubHistory().events.filter(e=>e.active&&e.kind==='session'&&e.catchup?.length&&(!level||e.level===level));
+ if(!events.length)return '';
+ return '<div class="card club-catchup"><h3>Provisional catch-up review</h3><p class="club-helper">Normal points are already included. Suggested bonus = half the gap to the median of established courtmates’ points after normal scoring. Only approval awards credit. Reduce or skip it if their results suggest the court was too strong. No final jump after the last provisional session.</p>'+events.slice().reverse().map(e=>'<details '+(e.catchup.some(x=>x.decision===null)?'open':'')+'><summary>'+esc(e.log.weekLabel)+' · '+esc(lvl(e.level).label)+'</summary>'+e.catchup.map((x,i)=>{const input='catchup-'+e.id+'-'+i;return '<div class="club-catchup-row"><strong>'+esc(x.name)+' · provisional '+x.ordinal+' / '+x.limit+'</strong><p>Earned: '+x.earned+' · Total before bonus: '+x.afterEarned+'<br>Reference: '+(x.reference===null?'not enough established courtmates':x.reference)+' · Suggested extra: '+x.suggestion+'<br>Results: '+x.wins+' wins / '+x.losses+' losses</p>'+(x.wins<x.losses?'<p class="club-helper">More losses than wins: consider reducing or skipping the bonus and reviewing their next court placement.</p>':'')+'<p class="club-helper">'+x.peers.map(p=>esc(p.name)+': '+p.points).join(' · ')+'</p>'+(x.decision===null?'<label>Extra points to approve <input id="'+input+'" type="number" min="0" max="'+x.suggestion+'" step="0.1" value="'+x.suggestion+'" inputmode="decimal"></label><div class="btn-row"><button class="btn btn-primary" onclick="clubApproveCatchup(\''+e.id+'\','+i+',false)">Approve</button><button class="btn" onclick="clubApproveCatchup(\''+e.id+'\','+i+',true)">Skip bonus</button></div>':'<p>Approved extra: <strong>'+x.approved+'</strong> · Session total: '+clubRound(x.earned+x.approved)+'</p>')+'</div>';}).join('')+'</details>').join('')+'</div>';
+}
+function clubApproveCatchup(eventId,index,skip){
+ if(clubHasDraft()){alert('Finish or cancel the current draft before reviewing catch-up points.');return;}
+ const e=clubFind(eventId),x=e?.catchup?.[index];if(!e?.active||!x||x.decision!==null)return;
+ const earlier=clubHistory().events.slice(0,clubHistory().events.indexOf(e)).some(p=>p.active&&p.level===e.level&&p.catchup?.some(c=>c.decision===null));if(earlier){alert('Review the earlier session in this ladder first.');return;}
+ const raw=skip?'0':document.getElementById('catchup-'+e.id+'-'+index)?.value,n=Number(raw);
+ if(raw===''||!Number.isFinite(n)||n<0||n>x.suggestion){alert('Enter extra points between 0 and '+x.suggestion+'.');return;}
+ clubObservePoints();e.catchupDecisions=e.catchupDecisions||{};e.catchupDecisions[x.id]=Math.floor(n*10)/10;
+ (e.catchupAudit||(e.catchupAudit=[])).push({at:new Date().toISOString(),playerId:x.id,name:x.name,action:skip?'Skipped':'Approved',suggested:x.suggestion,approved:e.catchupDecisions[x.id]});
+ clubReplay();save();renderAll();renderSession();renderLog();
+}
+function clubCatchupAuditHtml(){
+ const events=clubHistory().events.filter(e=>e.catchupAudit?.length);
+ return events.length?'<div class="card"><h3>Catch-up approval history</h3>'+events.slice().reverse().map(e=>'<details><summary>'+esc(e.log.weekLabel)+' · '+esc(lvl(e.level).label)+'</summary>'+e.catchupAudit.map(a=>'<p class="club-helper">'+esc(new Date(a.at).toLocaleString())+' · '+esc(a.name||'')+' '+esc(a.action)+(a.approved!==undefined?' · +'+a.approved+' (suggested '+a.suggested+')':'')+'</p>').join('')+'</details>').join('')+'</div>':'';
 }
 
 /* Automatic club sync. Public client key only; database policies authorize coordinators. */
@@ -4305,3 +4404,4 @@ load().then(clubSyncInit).catch(e=>clubSyncText('offline',e));
 
 </body>
 </html>
+
