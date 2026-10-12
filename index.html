@@ -844,6 +844,12 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 .club-player-editor{margin-top:14px;padding:16px 0 0;border-top:1px solid var(--border)}.club-player-editor .club-rating-controls{border:0;padding:10px 0 14px;margin:0}.club-player-edit-fields{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.club-player-edit-fields>label{min-width:190px;max-width:100%}.club-player-edit-fields select{max-width:100%;width:100%}.club-player-edit-fields .btn-row{margin:0;gap:7px}.club-player-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
 @media(max-width:650px){.club-add-fields{grid-template-columns:minmax(0,1fr) 100px}.club-add-fields>label:first-child{grid-column:1/-1}.club-add-footer{align-items:stretch;flex-direction:column}.club-add-footer>.btn{justify-content:center}.club-player-summary{grid-template-columns:32px minmax(0,1fr) auto;gap:10px}.club-player-quick-actions{grid-column:2/-1;justify-content:flex-start}.club-player-summary .avatar{width:32px;height:32px}.club-player-edit-fields{align-items:stretch;flex-direction:column}.club-player-editor .club-rating-controls{gap:8px}.club-player-editor-footer{align-items:flex-start}.club-player-editor-footer .club-helper{font-size:11px}#tab-players .club-add-player{padding:16px}.club-player-meta{gap:6px}}
 @media(max-width:350px){.club-add-fields{grid-template-columns:minmax(0,1fr)}.club-add-fields>label:first-child{grid-column:auto}}
+</style><style id="club-ladder-alignment">
+#tab-ladder .ladder-row{display:grid;grid-template-columns:38px 33px minmax(0,1fr) 12px;align-items:center;column-gap:11px;padding-left:7px;padding-right:7px}
+#tab-ladder .ladder-row>.lrank{width:100%;min-width:0}
+#tab-ladder .ladder-row>.avatar{display:flex;width:33px;height:33px;box-sizing:border-box;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+@media(max-width:480px){#tab-ladder .ladder-row{grid-template-columns:31px 29px minmax(0,1fr) 10px;column-gap:8px;padding-left:5px;padding-right:5px}#tab-ladder .ladder-row>.avatar{width:29px;height:29px}}
+@media print{#tab-ladder .ladder-row{grid-template-columns:24px 26px minmax(0,1fr)}}
 </style></head>
 <body>
 
