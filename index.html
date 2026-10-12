@@ -3040,7 +3040,7 @@ function showPlayerStats(playerIndex){
   modal.innerHTML=`<div class="player-stats-card">
     <div class="player-stats-header" style="background:${c.bg};color:${c.tx};">
       <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
-        <div class="avatar" style="width:48px;height:48px;font-size:18px;background:${c.tx};color:${c.bg};">${ini(p.name)}</div>
+        <div class="avatar" style="width:48px;height:48px;font-size:18px;background:${c.tx};color:${c.bg};" aria-label="${clubRating(p.skillRating)===null?'Unrated':'Skill rating '+clubRating(p.skillRating).toFixed(1)}" title="${clubRating(p.skillRating)===null?'Unrated':'Skill rating'}">${clubRating(p.skillRating)===null?'—':clubRating(p.skillRating).toFixed(1)}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-weight:700;font-size:17px;">${esc(p.name)}</div>
           <div style="font-size:12px;opacity:.85;">${lvInfo.label} · ${p.pts||0} ladder pts</div>
