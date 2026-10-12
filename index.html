@@ -897,10 +897,11 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:10px;">Add a new player</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
         <input type="text" id="new-name" placeholder="Player name" style="flex:1;min-width:180px;">
-        <select id="new-level" style="min-width:120px;"><option value="upper">Tuesday Morning · Men’s</option><option value="lower">Tuesday Morning · Women’s</option><option value="wed_upper">Wednesday Evening · Men’s</option><option value="wed_lower">Wednesday Evening · Women’s</option></select>
+        <select id="new-level" aria-label="Choose ladders" style="min-width:120px;max-width:100%;"><option value="both_upper">Both days · Men’s</option><option value="both_lower">Both days · Women’s</option><option value="upper">Tuesday Morning · Men’s</option><option value="lower">Tuesday Morning · Women’s</option><option value="wed_upper">Wednesday Evening · Men’s</option><option value="wed_lower">Wednesday Evening · Women’s</option></select>
         <button class="btn btn-primary" onclick="addPlayer()">+ Add player</button>
       </div>
     </div>
+    <p class="club-helper">Choose both days to add a player to Tuesday Morning and Wednesday Evening. Each ladder keeps its own points and results.</p><p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
       <button class="btn btn-sm" id="player-search-toggle" onclick="togglePlayerSearch()" title="Search players">🔍</button>
       <div id="player-search-box" style="display:none;flex:1;min-width:200px;position:relative;">
@@ -3091,6 +3092,7 @@ function renderPlayerList(){
             <button class="btn btn-sm edit-btn" onclick="editPoints(${i})" title="Edit points">✎ pts</button>
             <button class="btn btn-sm edit-btn" onclick="toggleCoordinator(${i})" title="${isCoord?'Remove coordinator flag':'Mark as ladder coordinator'}" style="${isCoord?'color:#ef9f27;':''}">★</button>
             <select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)" style="max-width:230px">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label)+'</option>').join('')}</select>
+            ${clubOtherDayExists(p)?'<span class="club-helper">Enrolled both days</span>':'<button class="btn btn-sm" onclick="clubAddOtherDay('+i+')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>'}
             <button class="btn btn-sm edit-btn" onclick="editPlayerName(${i})" title="Edit name">⌨ name</button>
             <button class="btn btn-sm btn-danger" onclick="removePlayer(${i})">🗑</button>
           </div>`;
@@ -3174,15 +3176,36 @@ function toggleCoordinator(i){
   save();renderAll();
 }
 
-function addPlayer(){
-  const inp=document.getElementById('new-name');
-  const lvSel=document.getElementById('new-level');
-  const name=inp.value.trim();if(!name)return;
-  const level=LEVELS[lvSel?.value]?lvSel.value:'lower';
-  if(S.players.some(p=>playerLevel(p)===level&&p.name.toLowerCase()===name.toLowerCase())){alert('This player is already in that ladder.');return;}
-  S.players.push({name,pts:0,level});
-  inp.value='';
-  save();renderAll();
+function clubOtherDay(level){return level.startsWith('wed_')?level.slice(4):'wed_'+level;}
+function clubPlayerNameKey(name){return String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase();}
+function clubOtherDayExists(p){const other=clubOtherDay(playerLevel(p));return S.players.some(x=>playerLevel(x)===other&&clubPlayerNameKey(x.name)===clubPlayerNameKey(p.name));}
+function clubEnrollPlayer(name,levels){
+ const added=[];
+ for(const level of levels){
+  if(!LEVELS[level]||S.players.some(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name)))continue;
+  S.players.push({name,level,pts:0,_clubId:clubId()});added.push(level);
+ }
+ return added;
+}
+async function clubSaveEnrollment(added){
+ const status=document.getElementById('club-enroll-status');
+ if(!added.length){status.textContent='Already enrolled in the selected ladder'+(document.getElementById('new-level').value.startsWith('both_')?'s':'')+'. Existing points are unchanged.';return;}
+ renderAll();
+ try{await save();status.textContent='Added to '+added.map(id=>lvl(id).label).join(' and ')+'. New ladder entries start at 0 points; each day is scored separately.';}
+ catch(e){status.textContent='Could not save the new entry. Keep this app open and download a backup.';}
+}
+async function addPlayer(){
+ const inp=document.getElementById('new-name'),choice=document.getElementById('new-level').value;
+ const name=inp.value.trim().replace(/\s+/g,' ');if(!name){document.getElementById('club-enroll-status').textContent='Enter a player name first.';return;}
+ const levels=choice==='both_upper'?['upper','wed_upper']:choice==='both_lower'?['lower','wed_lower']:LEVELS[choice]?[choice]:[];
+ const added=clubEnrollPlayer(name,levels);
+ if(added.length)inp.value='';
+ await clubSaveEnrollment(added);
+}
+async function clubAddOtherDay(i){
+ const p=S.players[i];if(!p)return;
+ const added=clubEnrollPlayer(p.name,[clubOtherDay(playerLevel(p))]);
+ await clubSaveEnrollment(added);
 }
 function removePlayer(i){
   if(clubHasDraft()){alert('Finish or cancel the active session before removing players.');return;}
