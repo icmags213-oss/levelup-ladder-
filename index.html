@@ -953,7 +953,7 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
       <div class="mini-label">Roster</div><h3>Add a player</h3>
       <div class="club-add-fields">
         <label for="new-name">Player name<input type="text" id="new-name" placeholder="First and last name" autocomplete="off"></label>
-        <label for="new-level">Ladder<select id="new-level"><option value="both_upper">Both days · Men’s</option><option value="both_lower">Both days · Women’s</option><option value="upper">Tues Evening Men’s Ladder</option><option value="lower">Tues Evening Women’s Ladder</option><option value="wed_upper">Wed Morning Men’s Ladder</option><option value="wed_lower">Wed Morning Women’s Ladder</option></select></label>
+        <label for="new-level">Ladder<select id="new-level"><option value="both_upper">Both Days · Men’s</option><option value="both_lower">Both Days · Women’s</option><option value="upper">Tues Evening · Men’s</option><option value="lower">Tues Evening · Women’s</option><option value="wed_upper">Wed Morning · Men’s</option><option value="wed_lower">Wed Morning · Women’s</option></select></label>
         <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
       </div>
       <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
@@ -3155,7 +3155,7 @@ function renderPlayerList(){
             <div id="club-player-editor-${i}" class="club-player-editor" ${expanded?'':'hidden'}>
               <div class="mini-label">Edit player</div>
               ${clubRatingControls(p,i)}
-              <div class="club-player-edit-fields"><label>Ladder<select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).label.replace('Tuesday Evening','Tues Evening').replace('Wednesday Morning','Wed Morning'))+'</option>').join('')}</select></label><div class="btn-row"><button class="btn btn-sm" onclick="editPlayerName(${i})">Edit name</button><button class="btn btn-sm" onclick="editPoints(${i})">Edit points</button><button class="btn btn-sm" onclick="toggleCoordinator(${i})">${isCoord?'Remove coordinator':'Make coordinator'}</button></div></div>
+              <div class="club-player-edit-fields"><label>Ladder<select aria-label="Ladder for ${esc(p.name)}" onchange="editPlayerLevel(${i},this.value)">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).schedule.replace('Tuesday','Tues').replace('Wednesday','Wed')+' · '+lvl(id).short)+'</option>').join('')}</select></label><div class="btn-row"><button class="btn btn-sm" onclick="editPlayerName(${i})">Edit name</button><button class="btn btn-sm" onclick="editPoints(${i})">Edit points</button><button class="btn btn-sm" onclick="toggleCoordinator(${i})">${isCoord?'Remove coordinator':'Make coordinator'}</button></div></div>
               <div class="club-player-editor-footer"><span class="club-helper">Changes save automatically.</span><button class="btn btn-sm btn-danger" onclick="removePlayer(${i})">Remove player</button></div>
             </div>
           </div>`;
