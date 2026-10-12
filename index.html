@@ -844,7 +844,7 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 .club-player-editor{margin-top:14px;padding:16px 0 0;border-top:1px solid var(--border)}.club-player-editor .club-rating-controls{border:0;padding:10px 0 14px;margin:0}.club-player-edit-fields{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.club-player-edit-fields>label{min-width:190px;max-width:100%}.club-player-edit-fields select{max-width:100%;width:100%}.club-player-edit-fields .btn-row{margin:0;gap:7px}.club-player-editor-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
 @media(max-width:650px){.club-add-fields{grid-template-columns:minmax(0,1fr) 100px}.club-add-fields>label:first-child{grid-column:1/-1}.club-add-footer{align-items:stretch;flex-direction:column}.club-add-footer>.btn{justify-content:center}.club-player-summary{grid-template-columns:32px minmax(0,1fr) auto;gap:10px}.club-player-quick-actions{grid-column:2/-1;justify-content:flex-start}.club-player-summary .avatar{width:32px;height:32px}.club-player-edit-fields{align-items:stretch;flex-direction:column}.club-player-editor .club-rating-controls{gap:8px}.club-player-editor-footer{align-items:flex-start}.club-player-editor-footer .club-helper{font-size:11px}#tab-players .club-add-player{padding:16px}.club-player-meta{gap:6px}}
 @media(max-width:350px){.club-add-fields{grid-template-columns:minmax(0,1fr)}.club-add-fields>label:first-child{grid-column:auto}}
-</style><style id="club-ladder-rating-style">.club-ladder-rating{display:inline-block;font-size:12px;font-weight:600;line-height:1.4;color:var(--text-muted);background:var(--surface-alt);border:1px solid var(--border);border-radius:5px;padding:3px 7px;white-space:nowrap}</style></head>
+</style></head>
 <body>
 
 <!-- PASSCODE LOCK SCREEN -->
@@ -2888,11 +2888,10 @@ function renderOneLadder(level){
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
     return`<div class="ladder-row ladder-row-clickable" onclick="showPlayerStats(${origIdx})" title="View player stats">
       <span class="lrank ${rankClass}">${String(i+1).padStart(2,'0')}</span>
-      <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
+      <div class="avatar" style="background:${c.bg};color:${c.tx}" aria-label="${clubRating(p.skillRating)===null?'Unrated':'Skill rating '+clubRating(p.skillRating).toFixed(1)}" title="${clubRating(p.skillRating)===null?'Unrated':'Skill rating'}">${clubRating(p.skillRating)===null?'—':clubRating(p.skillRating).toFixed(1)}</div>
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
           <span class="lname">${esc(p.name)}</span>
-          <span class="club-ladder-rating">${clubRating(p.skillRating)===null?'Unrated':'Rating '+clubRating(p.skillRating).toFixed(1)}</span>
           <span class="pts-pill" style="background:${c.bg};color:${c.tx}">${p.pts||0}<span class="club-points-unit">POINTS</span></span>
         </div>
         <div class="progress-bar">
