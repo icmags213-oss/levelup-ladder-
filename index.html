@@ -850,6 +850,18 @@ button:focus-visible,[role=button]:focus-visible{outline:3px solid #6d9637;outli
 #tab-ladder .ladder-row>.avatar{display:flex;width:33px;height:33px;box-sizing:border-box;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 @media(max-width:480px){#tab-ladder .ladder-row{grid-template-columns:31px 29px minmax(0,1fr) 10px;column-gap:8px;padding-left:5px;padding-right:5px}#tab-ladder .ladder-row>.avatar{width:29px;height:29px}}
 @media print{#tab-ladder .ladder-row{grid-template-columns:24px 26px minmax(0,1fr)}}
+</style><style>
+.club-theme-hint{font-size:10px;color:#f4f4e9;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:8px 4px;align-self:center}.club-theme-hint:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.club-theme-dialog{margin:auto;width:min(440px,calc(100vw - 28px));max-height:85dvh;overflow:auto;padding:22px;border:1px solid var(--border);border-radius:16px;background:var(--surface);color:var(--text-main);box-shadow:0 20px 70px #0006}.club-theme-dialog::backdrop{background:#0009}.club-theme-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.club-theme-heading h2{font-family:var(--font-sans);font-size:21px}.club-theme-dialog p{font-size:13px;line-height:1.5;color:var(--text-muted);margin:12px 0}.club-theme-options{display:grid;gap:8px}.club-theme-option{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px;border:1px solid var(--border);border-radius:9px;background:var(--surface-soft);color:var(--text-main);font:inherit;text-align:left;cursor:pointer}.club-theme-option>span{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:8px;font-size:25px}.club-theme-option small{margin-left:auto;font-size:11px}.club-theme-option[aria-pressed=true]{border:2px solid var(--text-main);padding:9px}.club-theme-option:focus-visible{outline:3px solid var(--text-main);outline-offset:2px}
+body[data-holiday=halloween]{--holiday-ink:#462443;--holiday-accent:#ffbd69;--holiday-paper:#fff9f0;--holiday-page:#f2e6dd;--holiday-muted:#725972;--holiday-dark:#241b2c}
+body[data-holiday=thanksgiving]{--holiday-ink:#573623;--holiday-accent:#f3cf81;--holiday-paper:#fffaf0;--holiday-page:#eee4d4;--holiday-muted:#78604d;--holiday-dark:#292018}
+body[data-holiday=christmas]{--holiday-ink:#602934;--holiday-accent:#f0d590;--holiday-paper:#fffaf2;--holiday-page:#eee4df;--holiday-muted:#77585d;--holiday-dark:#271b20}
+body[data-holiday=winter]{--holiday-ink:#193e60;--holiday-accent:#bce7ff;--holiday-paper:#f7fcff;--holiday-page:#e3edf5;--holiday-muted:#536c81;--holiday-dark:#122332}
+body[data-holiday]{--lime:var(--holiday-accent);--green:var(--holiday-ink);--green-mid:var(--holiday-ink);--green-dark:var(--holiday-ink);--page-bg:var(--holiday-page);--page-bg-top:var(--holiday-page);--tabs-bg:var(--holiday-ink);--card-bg:var(--holiday-paper);--surface:var(--holiday-paper);--surface-soft:var(--holiday-paper);--surface-alt:var(--holiday-page);--surface-muted:var(--holiday-page);--body-text:var(--holiday-ink);--text-strong:var(--holiday-ink);--text-main:var(--holiday-ink);--text-muted:var(--holiday-muted);--border:#c8bdb5;--border-soft:#d9d0ca;--input-border:#ad9d94}
+body.dark[data-holiday]{--page-bg:var(--holiday-dark);--page-bg-top:var(--holiday-dark);--card-bg:var(--holiday-dark);--surface:var(--holiday-dark);--surface-soft:#ffffff09;--surface-alt:#ffffff12;--surface-muted:#ffffff18;--body-text:#faf5eb;--text-main:#faf5eb;--text-strong:#fffaf2;--text-muted:#d0c9c0;--border:#ffffff38;--border-soft:#ffffff25;--input-border:#ffffff66}
+body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 0,transparent 36%),linear-gradient(125deg,var(--holiday-ink),var(--holiday-dark));}body[data-holiday] .hero::before,body[data-holiday] .hero::after{display:none}body[data-holiday] .court-header{background:var(--holiday-ink)}body[data-holiday] .court-header .mult-badge{background:var(--holiday-accent)!important;color:var(--holiday-ink)!important}body[data-holiday] .tab.active,body[data-holiday] .btn-primary{background:var(--holiday-accent);color:var(--holiday-ink);border-color:var(--holiday-accent)}body[data-holiday] .ladder-row:first-child .avatar{background:var(--holiday-paper)!important;color:var(--holiday-ink)!important;border-color:var(--holiday-ink)}body[data-holiday] .day-btn,body[data-holiday] .week-card,body[data-holiday] .club-ladder-card{border-top-color:var(--holiday-ink)}body[data-holiday] .mini-label{color:var(--text-main)}
+@media print{.club-theme-hint,.club-theme-dialog{display:none!important}}
+
 </style></head>
 <body>
 
@@ -4450,7 +4462,36 @@ load().then(clubSyncInit).catch(e=>clubSyncText('offline',e));
 })();
 </script>
 
-</body>
+<script>
+/* Seasonal appearance is local to this device; ladder data is unchanged. */
+(()=>{
+ const themes={original:{name:'Original',accent:'#d9fa57',ink:'#102a1b',symbol:'○'},halloween:{name:'Halloween',accent:'#ffbd69',ink:'#462443',symbol:'☾'},thanksgiving:{name:'Thanksgiving',accent:'#f3cf81',ink:'#573623',symbol:'❧'},christmas:{name:'Christmas',accent:'#f0d590',ink:'#602934',symbol:'✦'},winter:{name:'Winter',accent:'#bce7ff',ink:'#193e60',symbol:'❄'}};
+ const button=document.getElementById('theme-toggle');if(!button)return;
+ const dialog=document.createElement('dialog');dialog.className='club-theme-dialog';dialog.setAttribute('aria-labelledby','club-theme-title');
+ dialog.innerHTML='<div class="club-theme-heading"><h2 id="club-theme-title">Choose a theme</h2><button type="button" class="btn" aria-label="Close theme picker" data-close>×</button></div><p>Holiday colors for your club. Light and dark mode still work.</p><div class="club-theme-options">'+Object.entries(themes).map(([id,t])=>'<button type="button" class="club-theme-option" data-theme-choice="'+id+'" aria-pressed="false"><span aria-hidden="true" style="background:'+t.ink+';color:'+t.accent+'">'+t.symbol+'</span><b>'+t.name+'</b><small data-selected></small></button>').join('')+'</div><p class="club-theme-note">Saved on this device. Tap the sun or moon to switch light/dark; hold it to open this picker.</p>';
+ document.body.appendChild(dialog);
+ function apply(id){if(!themes[id])id='original';if(id==='original')delete document.body.dataset.holiday;else document.body.dataset.holiday=id;try{localStorage.setItem('levelup-holiday-theme',id);}catch(e){}dialog.querySelectorAll('[data-theme-choice]').forEach(el=>{const selected=el.dataset.themeChoice===id;el.setAttribute('aria-pressed',String(selected));el.querySelector('[data-selected]').textContent=selected?'Selected':'';});}
+ let initial='original';try{initial=localStorage.getItem('levelup-holiday-theme')||initial;}catch(e){}apply(initial);
+ const open=()=>{if(!dialog.open)dialog.showModal();};
+ dialog.querySelector('[data-close]').addEventListener('click',()=>dialog.close());
+ dialog.querySelectorAll('[data-theme-choice]').forEach(el=>el.addEventListener('click',()=>{apply(el.dataset.themeChoice);dialog.close();}));
+ dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
+ let timer=null,start=null,suppressUntil=0;
+ const cancel=()=>{clearTimeout(timer);timer=null;start=null;};
+ button.style.touchAction='manipulation';button.style.userSelect='none';button.style.webkitTouchCallout='none';
+ button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-describedby','club-theme-hint');
+ const hint=document.createElement('span');hint.id='club-theme-hint';hint.className='club-theme-hint';hint.textContent='Hold for themes';button.insertAdjacentElement('afterend',hint);
+ button.addEventListener('pointerdown',e=>{cancel();if(e.button!==0||e.isPrimary===false)return;suppressUntil=0;start={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{suppressUntil=Infinity;cancel();open();},600);});
+ button.addEventListener('pointermove',e=>{if(start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>10)cancel();});
+ ['pointerup','pointercancel','pointerleave','blur'].forEach(type=>button.addEventListener(type,cancel));
+ button.addEventListener('click',e=>{if(Date.now()<suppressUntil){e.preventDefault();e.stopImmediatePropagation();suppressUntil=0;}},true);
+ button.addEventListener('contextmenu',e=>{e.preventDefault();cancel();suppressUntil=Infinity;open();});
+ button.addEventListener('keydown',e=>{if(e.key==='ArrowDown'){e.preventDefault();open();}});
+ // Discoverable keyboard/touch alternative to the hold gesture.
+ hint.tabIndex=0;hint.setAttribute('role','button');hint.setAttribute('aria-label','Choose holiday theme');hint.addEventListener('click',open);hint.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}});
+})();
+
+</script></body>
 </html>
 
 
