@@ -2934,6 +2934,8 @@ function computePlayerStats(playerName,playerId){
     ptsScored:0,      // total game points scored across all sessions
     ptsConceded:0,    // total game points conceded across all sessions
     ladderPoints:0,   // sum of ladder points earned across all sessions
+    winPct:0,
+    avgRankChange:null,
     sessionHistory:[],// chronological list for the detail view
     rankHistory:[]    // [{date, rank, level, weekLabel}]
   };
@@ -3067,7 +3069,7 @@ function showPlayerStats(playerIndex){
         <div class="stat-item"><div class="stat-num">${stats.wins} <span style="font-size:13px;color:var(--text-muted);">/ ${stats.losses}</span></div><div class="stat-cap">Wins / Losses</div></div>
         <div class="stat-item"><div class="stat-num">${stats.winPct}%</div><div class="stat-cap">Win %</div></div>
         <div class="stat-item"><div class="stat-num">${stats.ptsScored} <span style="font-size:13px;color:var(--text-muted);">/ ${stats.ptsConceded}</span></div><div class="stat-cap">Game Pts Scored / Conceded</div></div>
-        <div class="stat-item"><div class="stat-num">${p.pts||0}</div><div class="stat-cap">Ladder Points</div></div>
+        <div class="stat-item"><div class="stat-num">${p.pts||0}</div><div class="stat-cap">Ladder Points</div><button type="button" class="btn btn-sm" style="margin-top:12px" onclick="clubEditProfilePoints(${playerIndex})">+ Add / adjust points</button></div>
         <div class="stat-item" style="grid-column:1/-1;"><div class="stat-num" style="font-size:18px;">${avgChangeStr}</div><div class="stat-cap">Avg Rank Change</div></div>
       </div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text-strong);margin:18px 0 8px;">Recent Sessions</h4>
@@ -3076,6 +3078,12 @@ function showPlayerStats(playerIndex){
     </div>
   </div>`;
   document.body.appendChild(modal);
+}
+
+function clubEditProfilePoints(playerIndex){
+  editPoints(playerIndex);
+  closePlayerStats();
+  showPlayerStats(playerIndex);
 }
 
 function closePlayerStats(){
