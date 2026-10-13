@@ -862,7 +862,7 @@ body.dark[data-holiday]{--page-bg:var(--holiday-dark);--page-bg-top:var(--holida
 body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 0,transparent 36%),linear-gradient(125deg,var(--holiday-ink),var(--holiday-dark));}body[data-holiday] .hero::before,body[data-holiday] .hero::after{display:none}body[data-holiday] .court-header{background:var(--holiday-ink)}body[data-holiday] .court-header .mult-badge{background:var(--holiday-accent)!important;color:var(--holiday-ink)!important}body[data-holiday] .tab.active,body[data-holiday] .btn-primary{background:var(--holiday-accent);color:var(--holiday-ink);border-color:var(--holiday-accent)}body[data-holiday] .ladder-row:first-child .avatar{background:var(--holiday-paper)!important;color:var(--holiday-ink)!important;border-color:var(--holiday-ink)}body[data-holiday] .day-btn,body[data-holiday] .week-card,body[data-holiday] .club-ladder-card{border-top-color:var(--holiday-ink)}body[data-holiday] .mini-label{color:var(--text-main)}
 @media print{.club-theme-hint,.club-theme-dialog{display:none!important}}
 
-</style></head>
+</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style></head>
 <body>
 
 <!-- PASSCODE LOCK SCREEN -->
@@ -975,7 +975,7 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
         <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
       </div>
       <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
-      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" checked><span><strong>Provisional newcomer</strong><small>First 3 sessions in each ladder · catch-up points need your approval</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
+      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" disabled hidden><span><strong>Average-based ranking</strong><small>Only played rounds count toward each player’s average.</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
       <p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
     </div>
     <div id="player-search-box" class="club-roster-search">
@@ -1024,7 +1024,7 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
         <button class="btn" onclick="downloadBackup()" style="background:#fff;border:1px solid #d9534f;color:#a02622;">💾 Backup first (recommended)</button>
       </div>
       <div class="btn-row" style="margin-top:0;margin-bottom:6px;">
-        <button class="btn" onclick="resetPointsOnly()" style="background:#fff3cd;border:1px solid #d9a521;color:#7a5800;">🔄 Reset points only (keep players)</button>
+        <button class="btn" onclick="resetPointsOnly()" style="background:#fff3cd;border:1px solid #d9a521;color:#7a5800;">🔄 Reset new season (keep players)</button>
       </div>
       <p style="font-size:11px;color:var(--text-muted);margin:0 0 10px 6px;">Keeps players and ladder membership. Clears points, weeks, attendance, and session history for a new season.</p>
       <div class="btn-row" style="margin-top:0;margin-bottom:6px;">
@@ -1088,7 +1088,7 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
 
 <script src="supabase-2.102.0.js"></script>
 <script src="sync-core.js"></script>
-<script src="public-template.js?v=24-6"></script>
+<script src="public-template.js?v=28"></script>
 <script>
 /* ====== Passcode lock ====== */
 const PASSCODE='24681';
@@ -1210,6 +1210,7 @@ function lastName(name){
 }
 
 const DEFAULT_CFG={
+  scoringModel:"court-average-v1",courtBase:[30,25,20,15,10,5],placementBonus:[8,6,4,2,0],fivePlayers:true,
   showUp:20,
   perGame:12,
   perLoss:4,
@@ -1248,7 +1249,7 @@ async function load(){
   if(!S.weeks)S.weeks=[];
   if(!S.players)S.players=[];
   if(!S.log)S.log=[];
-  clubMigrateLadders();
+  clubMigrateLadders();avgMigrate();
   await storageSet(STORAGE_KEY,JSON.stringify(S));
   await storageSet(SESS_KEY,JSON.stringify(sess));
   // Integrity check: if sess claims an in-progress session but required arrays/indices are invalid, reset it
@@ -1417,7 +1418,7 @@ function renderSession(){
     if(el){
       el.innerHTML=`<div class="card" style="border:2px solid #d9534f;background:#fff5f5;">
         <h3 style="color:#a02622;margin-bottom:8px;">⚠️ Events tab error</h3>
-        <p style="font-size:13px;margin-bottom:10px;color:#1e293b;">Something is wrong with the data. Try: Backup tab → Danger zone → Reset points only (keep players).</p>
+        <p style="font-size:13px;margin-bottom:10px;color:#1e293b;">Something is wrong with the data. Try: Backup tab → Danger zone → Reset new season (keep players).</p>
         <pre style="font-size:10px;background:#fff;padding:10px;border-radius:8px;overflow:auto;color:#333;max-height:200px;white-space:pre-wrap;margin-top:8px;">${esc(String(err.message||err))}</pre>
       </div>`;
     }
@@ -1750,9 +1751,7 @@ function renderPlayerPicker(el){
     })()}
     </div>
     <div style="background:var(--surface-soft);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-muted);border:1px solid var(--border-soft);">
-      ⓘ Show up → <strong style="font-weight:700;color:var(--text-strong);">+${S.cfg.showUp}pts</strong> &nbsp;·&nbsp;
-      Win → <strong style="font-weight:700;color:var(--text-strong);">+${S.cfg.perGame}pts × court multiplier</strong> &nbsp;·&nbsp;
-      Lose → <strong style="font-weight:700;color:var(--down);">−${S.cfg.perLoss}pts × court multiplier</strong>
+      Court base points + placement bonus each round. Ladder standings use average points per round.
     </div>
     <div class="btn-row">
       <button class="btn" onclick="selAll()">Select all</button>
@@ -1775,7 +1774,7 @@ function renderPlayerPicker(el){
         const mult=courtMult(i);
         return`<div class="settings-row">
           <span class="settings-label">${cname(i)}
-            <span class="mult-badge" style="background:${mc.bg};color:${mc.tx};margin-left:6px;">${mult.toFixed(2)}x</span>
+            <span class="mult-badge" style="background:${mc.bg};color:${mc.tx};margin-left:6px;">${avgCourtLabel(i,mult)}</span>
           </span>
           <input type="number" inputmode="numeric" min="1" max="12" value="${sz}" onchange="updateCourtSize(${i},this.value)" onfocus="this.select()" style="width:80px;text-align:center;">
           <span style="font-size:12px;color:var(--text-muted)">players</span>
@@ -1784,7 +1783,7 @@ function renderPlayerPicker(el){
       }).join('')}
       <div class="btn-row" style="margin-top:12px;">
         <button class="btn btn-sm" onclick="addCourt()">+ Add court</button>
-        <button class="btn btn-sm" onclick="autoFillCourtSizes()">↻ Auto-fill (4s)</button>
+        <button class="btn btn-sm" onclick="autoFillCourtSizes()">↻ Auto-fill courts</button>
       </div>
       <div style="background:${diff===0?'var(--surface-soft)':(diff>0?'#FAEEDA':'#FCEBEB')};border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12px;color:${diff===0?'var(--text-muted)':(diff>0?'#633806':'#791F1F')};border:1px solid var(--border-soft);">
         ${diff===0
@@ -1807,7 +1806,7 @@ function renderPlayerPicker(el){
           return`<div style="margin-bottom:10px;">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
               <strong style="font-size:13px;color:var(--text-strong);">${activeCname(ci)}</strong>
-              <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${mult.toFixed(2)}x</span>
+              <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${avgCourtLabel(ci,mult)}</span>
               <span style="font-size:11px;color:var(--text-muted);">${court.length} player${court.length!==1?'s':''} · ${gpp} game${gpp!==1?'s':''} each</span>
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -1856,21 +1855,18 @@ function renderScoreInputs(courts,round){
     return`<div class="court-block">
       <div class="court-header">
         <span class="court-name">${activeCname(ci)}</span>
-        <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${mult.toFixed(2)}x</span>
+        <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${avgCourtLabel(ci,mult)}</span>
         ${isOdd?`<span class="odd-badge">Game to 11</span>`:''}
         <span style="font-size:12px;color:var(--text-muted)">${court.length} players · ${gamesPerPlayer} games each</span>
         ${canUseSheet?`<button class="btn btn-sm btn-primary" style="margin-left:auto;" onclick="openScoresheet(${ci},'${round}')" title="Enter scores from the printed sheet">📋 Use scoresheet</button>`:''}
         <button class="btn btn-sm" style="${canUseSheet?'':'margin-left:auto;'}" onclick="openAddToCourt(${ci},'${round}')" title="Add a late arrival to this court">+ Add player</button>
       </div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
-        Win = +${cfg.perGame}×${mult.toFixed(2)} = <strong style="font-weight:700;color:var(--up)">+${Math.round(cfg.perGame*mult*10)/10}pts</strong> &nbsp;·&nbsp;
-        Loss = −${cfg.perLoss}×${mult.toFixed(2)} = <strong style="font-weight:700;color:var(--down)">−${Math.round(cfg.perLoss*mult*10)/10}pts</strong>
-      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">${avgBase(ci)} base points + placement bonus (8 / 6 / 4 / 2${court.length===5?' / 0':''}). Rank by wins, then game points.</div>
       ${court.map(pi=>{
         const pl=S.players[pi];const c=col(pi);
         const gw=games[pi]||0;
         const gl=Math.max(0,gamesPerPlayer-gw);
-        const preview=Math.round(((gw*cfg.perGame)-(gl*cfg.perLoss))*mult*10)/10;
+        const preview=avgRoundValue(court,ci,pi,round);
         const isSwapping=sess.swapping&&sess.swapping.pi===pi&&sess.swapping.round===round;
         const isFillIn=(sess.fillIns||[]).includes(pi);
         return`<div class="player-row" style="${isFillIn?'background:#FAEEDA;border-radius:8px;padding-left:6px;padding-right:6px;':''}">
@@ -1879,16 +1875,16 @@ function renderScoreInputs(courts,round){
           <span class="pname">${esc(pl.name)}${isFillIn?` <span style="font-size:10px;font-weight:700;color:#633806;background:#fff;border:1px solid #ef9f27;padding:1px 6px;border-radius:999px;margin-left:4px;">FILL-IN · NO PTS</span>`:''}</span>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <div class="score-wrap"><span class="score-lbl">Games won</span>
-              <input class="num-in" type="number" inputmode="numeric" enterkeyhint="next" min="0" max="${gamesPerPlayer}" value="${gw}" aria-label="Wins for ${esc(pl.name).replace(/"/g,'&quot;')}" oninput="setScore('${round}g',${pi},this.value,${ci},'${round}')" onfocus="this.select()">
+              <input class="num-in" type="number" inputmode="numeric" enterkeyhint="next" min="0" max="${gamesPerPlayer}" value="${games[pi]??''}" aria-label="Wins for ${esc(pl.name).replace(/"/g,'&quot;')}" oninput="setScore('${round}g',${pi},this.value,${ci},'${round}')" onfocus="this.select()">
             </div>
             <div class="score-wrap"><span class="score-lbl">Points scored</span>
-              <input class="num-in" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${pts[pi]||0}" aria-label="Points scored for ${esc(pl.name).replace(/"/g,'&quot;')}" oninput="setScore('${round}p',${pi},this.value,${ci},'${round}')" onfocus="this.select()">
+              <input class="num-in" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${pts[pi]??''}" aria-label="Points scored for ${esc(pl.name).replace(/"/g,'&quot;')}" oninput="setScore('${round}p',${pi},this.value,${ci},'${round}')" onfocus="this.select()">
             </div>
             <div class="score-wrap"><span class="score-lbl">Points conceded</span>
               <input class="num-in" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${conc[pi]||0}" aria-label="Points conceded for ${esc(pl.name).replace(/"/g,'&quot;')}" oninput="setScore('${round}c',${pi},this.value,${ci},'${round}')" onfocus="this.select()">
             </div>
             <div class="score-wrap" id="prev-${round}-${pi}">
-              <span class="score-lbl">Earns</span>
+              <span class="score-lbl">Projected pts</span>
               <span style="font-size:14px;font-weight:700;color:${preview>=0?'var(--up)':'var(--down)'}">${preview>=0?'+':''}${preview}</span>
             </div>
             <button class="btn btn-sm" onclick="toggleSwapMenu(${pi},'${round}')" title="Swap or remove this player">⇄</button>
@@ -2064,7 +2060,7 @@ function renderScoresheetCalc(court,ci,round){
   return`<div class="court-block scoresheet-card">
     <div class="court-header">
       <span class="court-name">📋 ${activeCname(ci)} — Scoresheet</span>
-      <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${mult.toFixed(2)}x</span>
+      <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${avgCourtLabel(ci,mult)}</span>
       <span style="font-size:12px;color:var(--text-muted)">${court.length} players · ${pattern.length} rounds</span>
       <button class="btn btn-sm" style="margin-left:auto;" onclick="closeScoresheet()">✕ Cancel</button>
     </div>
@@ -2374,20 +2370,10 @@ function calcRotationMoves(courts,games,points,n){
 }
 
 function renderRotationSummary(){
-  const n=sess.rotationCount||1;
+  const n=1;
   const drop=new Set(sess.dropouts||[]);
 
-  // Rotation style toggle
-  const toggle=`<div class="card" style="margin-bottom:12px;">
-    <div class="mini-label">Rotation style</div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn ${n===1?'btn-primary':''}" style="flex:1;" onclick="setRotationCount(1)">1 up / 1 down</button>
-      <button class="btn ${n===2?'btn-primary':''}" style="flex:1;" onclick="setRotationCount(2)">2 up / 2 down</button>
-    </div>
-    <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">
-      ${n===1?'The top player from each lower court swaps with the bottom player of the court above (each moves one court).':'The top 2 players from each lower court swap with the bottom 2 of the court above (each moves one court).'}
-    </p>
-  </div>`;
+  const toggle='<div class="card"><h3>One up / one down</h3><p class="club-helper">First place moves up; last place moves down. Middle players stay. At the top and bottom edge, players stay on their court.</p></div>';
 
   // Dropouts section — checkboxes for each R1 player
   const allR1Players=[];
@@ -2396,7 +2382,7 @@ function renderRotationSummary(){
   const dropoutCard=`<div class="card" style="margin-bottom:12px;">
     <div class="mini-label">After round 1</div>
     <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:4px;">Anyone leaving?</h3>
-    <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Tap a player to mark them as dropping out before round 2. Their round 1 points and show-up bonus still count.</p>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Tap a player to mark them as dropping out before round 2. Only their completed round counts toward their average.</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
     ${allR1Players.map(pi=>{
       const isOut=drop.has(pi);
@@ -2447,7 +2433,7 @@ function renderRotationSummary(){
       return`<div style="margin-bottom:10px;${flagSmall?'padding:8px;border:1px dashed #791F1F;border-radius:8px;':''}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
           <strong style="font-size:13px;color:var(--text-strong);">${activeCname(ci)}</strong>
-          <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${mult.toFixed(2)}x</span>
+          <span class="mult-badge" style="background:${mc.bg};color:${mc.tx}">${avgCourtLabel(ci,mult)}</span>
           <span style="font-size:11px;color:${flagSmall?'#791F1F':'var(--text-muted)'};">${court.length} player${court.length!==1?'s':''}${flagSmall?' · below 4!':''}</span>
           <button class="btn btn-sm" style="margin-left:auto;" onclick="openR2Edit(${ci})">✎ Edit</button>
         </div>
@@ -2554,7 +2540,7 @@ function renderR2Editor(){
   let html=`<div class="card">
     <div class="mini-label">Manual edit</div>
     <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:4px;">
-      ${activeCname(ci)} <span class="mult-badge" style="background:${mc.bg};color:${mc.tx};margin-left:6px;">${mult.toFixed(2)}x</span>
+      ${activeCname(ci)} <span class="mult-badge" style="background:${mc.bg};color:${mc.tx};margin-left:6px;">${avgCourtLabel(ci,mult)}</span>
     </h3>
     <p style="font-size:12px;color:${flagSmall?'#791F1F':'var(--text-muted)'};margin-bottom:12px;">${myCourt.length} player${myCourt.length!==1?'s':''}${flagSmall?' · needs at least 4':''}</p>
     <div style="margin-bottom:14px;">
@@ -2896,7 +2882,7 @@ function renderOneLadder(level){
     el.innerHTML='<div class="card"><div class="empty">No players in this ladder yet.</div></div>';
     return;
   }
-  const sorted=[...players].sort((a,b)=>(b.p.pts||0)-(a.p.pts||0));
+  const sorted=[...players].sort((a,b)=>avgCompare(a.p,b.p));
   const maxPts=Math.max(1,sorted[0]?.p.pts||1);
   el.innerHTML=`<div class="card">${sorted.map((entry,i)=>{
     const p=entry.p,origIdx=entry.i;
@@ -2910,9 +2896,9 @@ function renderOneLadder(level){
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
           <span class="lname">${esc(p.name)}</span>
-          <span class="pts-pill" style="background:${c.bg};color:${c.tx}">${p.pts||0}<span class="club-points-unit">POINTS</span></span>
+          <span class="pts-pill" style="background:${c.bg};color:${c.tx}">${p.roundsPlayed?avgRating(p).toFixed(2):'—'}<span class="club-points-unit">AVG / ROUND</span></span>
         </div>
-        <div class="progress-bar">
+        <div class="club-average-meta">${p.roundsPlayed||0} rounds · ${p.pts||0} total points</div><div class="progress-bar">
           <div class="progress-fill" style="width:${barW}%;background:${c.tx};opacity:.65;"></div>
         </div>
       </div>
@@ -3057,7 +3043,7 @@ function showPlayerStats(playerIndex){
         <div class="avatar" style="width:48px;height:48px;font-size:18px;background:${c.tx};color:${c.bg};" aria-label="${clubRating(p.skillRating)===null?'Unrated':'Skill rating '+clubRating(p.skillRating).toFixed(1)}" title="${clubRating(p.skillRating)===null?'Unrated':'Skill rating'}">${clubRating(p.skillRating)===null?'—':clubRating(p.skillRating).toFixed(1)}</div>
         <div style="flex:1;min-width:0;">
           <div style="font-weight:700;font-size:17px;">${esc(p.name)}</div>
-          <div style="font-size:12px;opacity:.85;">${lvInfo.label} · ${p.pts||0} ladder pts</div>
+          <div style="font-size:12px;opacity:.85;">${lvInfo.label} · ${p.roundsPlayed?avgRating(p).toFixed(2):'—'} average · ${p.roundsPlayed||0} rounds</div>
         </div>
       </div>
       <button class="btn btn-sm" onclick="closePlayerStats()" aria-label="Close" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.35);color:#fff;">✕</button>
@@ -3069,7 +3055,7 @@ function showPlayerStats(playerIndex){
         <div class="stat-item"><div class="stat-num">${stats.wins} <span style="font-size:13px;color:var(--text-muted);">/ ${stats.losses}</span></div><div class="stat-cap">Wins / Losses</div></div>
         <div class="stat-item"><div class="stat-num">${stats.winPct}%</div><div class="stat-cap">Win %</div></div>
         <div class="stat-item"><div class="stat-num">${stats.ptsScored} <span style="font-size:13px;color:var(--text-muted);">/ ${stats.ptsConceded}</span></div><div class="stat-cap">Game Pts Scored / Conceded</div></div>
-        <div class="stat-item"><div class="stat-num">${p.pts||0}</div><div class="stat-cap">Ladder Points</div><button type="button" class="btn btn-sm" style="margin-top:12px" onclick="clubEditProfilePoints(${playerIndex})">+ Add / adjust points</button></div>
+        <div class="stat-item"><div class="stat-num">${p.pts||0}</div><div class="stat-cap">Total Ladder Points</div><button type="button" class="btn btn-sm" style="margin-top:12px" onclick="clubEditProfilePoints(${playerIndex})">+ Add / adjust points</button></div>
         <div class="stat-item" style="grid-column:1/-1;"><div class="stat-num" style="font-size:18px;">${avgChangeStr}</div><div class="stat-cap">Avg Rank Change</div></div>
       </div>
       <h4 style="font-size:13px;font-weight:700;color:var(--text-strong);margin:18px 0 8px;">Recent Sessions</h4>
@@ -3177,7 +3163,7 @@ function renderPlayerList(){
             <div class="club-player-summary">
               <div class="avatar" style="background:${c.bg};color:${c.tx}">${ini(p.name)}</div>
               <div class="club-player-identity"><strong>${esc(p.name)}${isCoord?' <span title="Coordinator" aria-label="Coordinator">★</span>':''}</strong><div class="club-player-meta"><span>Rating <b>${clubRating(p.skillRating)??'—'}</b></span><span class="club-player-badge ${provisional?'is-provisional':''}">${provisional?'Provisional '+count+'/'+p.provisional.limit:'Established'}</span></div></div>
-              <div class="club-player-points"><strong>${p.pts||0}</strong><small>pts</small></div>
+              <div class="club-player-points"><strong>${p.roundsPlayed?avgRating(p).toFixed(2):'—'}</strong><small>avg</small></div>
               <div class="club-player-quick-actions">${clubOtherDayExists(p)?'<span class="club-both-days">Both days</span>':'<button class="btn btn-sm" onclick="clubAddOtherDay('+i+')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>'}<button class="btn btn-sm" aria-expanded="${expanded}" aria-controls="club-player-editor-${i}" onclick="clubTogglePlayerEditor(${i})">${expanded?'Done':'Edit'}</button></div>
             </div>
             <div id="club-player-editor-${i}" class="club-player-editor" ${expanded?'':'hidden'}>
@@ -3277,7 +3263,7 @@ function clubEnrollPlayer(name,levels,options={}){
  for(const level of levels){
   if(!LEVELS[level]||S.players.some(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name)))continue;
   const player={name,level,pts:0,_clubId:clubId(),skillRating:clubRating(options.rating)};
-  if(options.provisional!==false)player.provisional={id:clubId(),limit:3};
+  player.roundsPlayed=0;
   S.players.push(player);added.push(level);
  }
  return added;
@@ -3478,7 +3464,7 @@ function downloadPublicStandings(){
     id:p._clubId,
     name:p.name,
     level:playerLevel(p),
-    pts:p.pts||0
+    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,average:avgRating(p),skillRating:p.skillRating
   }));
   // Pre-compute each player's stats so the standings page is fully self-contained.
   const stats={};
@@ -3520,7 +3506,7 @@ async function shareStandings(){
     id:p._clubId,
     name:p.name,
     level:playerLevel(p),
-    pts:p.pts||0
+    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,average:avgRating(p),skillRating:p.skillRating
   }));
   const stats={};
   S.players.forEach(p=>{
@@ -3731,7 +3717,7 @@ function showPlayer(name){
         ? '<span style="color:#dc2626;">\u25BC '+Math.abs(s.avgRankChange).toFixed(2)+'</span>'
         : '<span style="color:#697186;">\u00B10</span>');
   const recent=(s.sessionHistory||[]).map(h=>'<div class="history-row"><div class="top"><span>'+esc(h.weekLabel||'')+' \u00B7 '+esc(h.day||'')+'</span><span class="meta">'+esc(h.date||'')+'</span></div><div class="meta">'+h.wins+'W / '+h.losses+'L \u00B7 <strong style="color:'+(h.points>=0?'#10b981':'#dc2626')+';">'+(h.points>=0?'+':'')+h.points+' pts</strong></div></div>').join('')||'<div class="empty">No sessions on record yet.</div>';
-  document.getElementById('modal-root').innerHTML='<div class="modal" onclick="if(event.target===this)closePlayer()"><div class="modal-card"><div class="modal-head" style="background:'+c.bg+';"><div class="avatar" style="background:'+c.tx+';color:'+c.bg+'">'+ini(p.name)+'</div><div style="flex:1;min-width:0;"><div class="modal-name" style="color:'+c.tx+';">'+esc(p.name)+'</div><div class="modal-sub" style="color:'+c.tx+';opacity:.8;">'+lv.label+' \u00B7 '+p.pts+' ladder pts</div></div><button class="modal-close" onclick="closePlayer()">\u2715</button></div><div class="modal-body"><div class="grid"><div class="stat"><div class="stat-num">'+s.sessions+'</div><div class="stat-cap">Sessions</div></div><div class="stat"><div class="stat-num">'+s.matches+'</div><div class="stat-cap">Matches</div></div><div class="stat"><div class="stat-num">'+s.wins+' <span style="font-size:13px;color:#697186;">/ '+s.losses+'</span></div><div class="stat-cap">Wins / Losses</div></div><div class="stat"><div class="stat-num">'+s.winPct+'%</div><div class="stat-cap">Win %</div></div><div class="stat"><div class="stat-num">'+s.ladderPoints+'</div><div class="stat-cap">Ladder Points</div></div><div class="stat"><div class="stat-num">'+s.ptsScored+' <span style="font-size:13px;color:#697186;">/ '+s.ptsConceded+'</span></div><div class="stat-cap">Game Pts Scored / Conceded</div></div><div class="stat" style="grid-column:1/-1;"><div class="stat-num" style="font-size:18px;">'+avgChange+'</div><div class="stat-cap">Avg Rank Change</div></div></div><h4>Recent Sessions</h4><div class="history">'+recent+'</div></div></div></div>';
+  document.getElementById('modal-root').innerHTML='<div class="modal" onclick="if(event.target===this)closePlayer()"><div class="modal-card"><div class="modal-head" style="background:'+c.bg+';"><div class="avatar" style="background:'+c.tx+';color:'+c.bg+'">'+ini(p.name)+'</div><div style="flex:1;min-width:0;"><div class="modal-name" style="color:'+c.tx+';">'+esc(p.name)+'</div><div class="modal-sub" style="color:'+c.tx+';opacity:.8;">'+lv.label+' \u00B7 '+p.pts+' ladder pts</div></div><button class="modal-close" onclick="closePlayer()">\u2715</button></div><div class="modal-body"><div class="grid"><div class="stat"><div class="stat-num">'+s.sessions+'</div><div class="stat-cap">Sessions</div></div><div class="stat"><div class="stat-num">'+s.matches+'</div><div class="stat-cap">Matches</div></div><div class="stat"><div class="stat-num">'+s.wins+' <span style="font-size:13px;color:#697186;">/ '+s.losses+'</span></div><div class="stat-cap">Wins / Losses</div></div><div class="stat"><div class="stat-num">'+s.winPct+'%</div><div class="stat-cap">Win %</div></div><div class="stat"><div class="stat-num">'+s.ladderPoints+'</div><div class="stat-cap">Total Ladder Points</div></div><div class="stat"><div class="stat-num">'+s.ptsScored+' <span style="font-size:13px;color:#697186;">/ '+s.ptsConceded+'</span></div><div class="stat-cap">Game Pts Scored / Conceded</div></div><div class="stat" style="grid-column:1/-1;"><div class="stat-num" style="font-size:18px;">'+avgChange+'</div><div class="stat-cap">Avg Rank Change</div></div></div><h4>Recent Sessions</h4><div class="history">'+recent+'</div></div></div></div>';
 }
 function closePlayer(){document.getElementById('modal-root').innerHTML='';}
 document.getElementById('updated').textContent=DATA.updated;
@@ -3835,7 +3821,7 @@ function clubRequestReset(mode){
  clubResetMode=mode;
  const all=mode==='everything';
  document.getElementById('club-reset-confirm').hidden=false;
- document.getElementById('club-reset-description').textContent=all?'Delete all players, points, weeks, attendance, session history, and current session progress? Your scoring settings will stay.':'Set all points to zero and clear weeks, attendance, session history, and current session progress? Player names, ladder membership, and scoring settings will stay.';
+ document.getElementById('club-reset-description').textContent=all?'Delete all players, points, weeks, attendance, session history, and current session progress? Your scoring settings will stay.':'Set total points and rounds played to zero and clear weeks, attendance, session history, and current session progress? Player names, ladder membership, and scoring settings will stay.';
  document.getElementById('club-reset-label').textContent='Type '+(all?'DELETE':'RESET')+' to confirm';
  document.getElementById('club-reset-input').value='';
  document.getElementById('club-reset-status').textContent='';
@@ -3847,7 +3833,7 @@ async function clubConfirmReset(){
  const status=document.getElementById('club-reset-status');
  if(document.getElementById('club-reset-input').value.trim()!==(mode==='everything'?'DELETE':'RESET')){status.textContent='Enter the confirmation word above to continue.';return;}
  clubResetMode=null;
- if(mode==='everything')S.players=[];else S.players.forEach(p=>{p.pts=0;});
+ if(mode==='everything')S.players=[];else S.players.forEach(p=>{p.pts=0;p.roundsPlayed=0;delete p.provisional;});
  S.weeks=[];S.log=[];delete S._clubHistory;clubDetail=null;
  sess={phase:0,day:'wed',weekIdx:-1,sessionLevel:'upper',present:[],courtSizes:[],rotationCount:0,dropouts:[],fillIns:[],r1courts:[],r2courts:[],r1g:{},r1p:{},r1c:{},r2g:{},r2p:{},r2c:{},lastSummary:null,courtNames:[],pickerSearch:'',pickerExpanded:false,swapping:null,addingTo:null,editingCourt:null,r2courtsManual:false,scoresheet:null};
  renderAll();
@@ -3894,7 +3880,7 @@ function applyLoadedBackup(data){
   if(!S.cfg.courtNames)S.cfg.courtNames=[...DEFAULT_CFG.courtNames];
   if(!S.weeks)S.weeks=[];
   if(!S.log)S.log=[];
-  clubMigrateLadders();
+  clubMigrateLadders();avgMigrate();
   save();renderAll();
 }
 
@@ -4400,7 +4386,7 @@ async function clubSyncAttach(session){
  clubSync=new LevelUpSync({local,meta:saved?.meta,
   id:()=>crypto.randomUUID(),
   read:async()=>{const {data,error}=await clubCloud.from('levelup_state').select('*').eq('id','levelup').single();if(error){if(error.code==='PGRST116')error.code='42501';throw error;}return data;},
-  write:async p=>{const {data,error}=await clubCloud.rpc('levelup_save_v2',{expected_revision:p.revision,next_mutation:p.id,next_payload:p.payload});if(error)throw error;return data;},
+  write:async p=>{const {data,error}=await clubCloud.rpc('levelup_save_v3',{expected_revision:p.revision,next_mutation:p.id,next_payload:p.payload});if(error)throw error;return data;},
   persist:(meta,payload)=>{if(epoch!==clubSyncEpoch)return;try{localStorage.setItem(CLUB_SYNC_STORAGE,JSON.stringify({user:user.id,meta,payload}));}catch(cause){const e=new Error('Device storage is full');e.code='STORAGE';throw e;}},
   apply:async payload=>{
    if(epoch!==clubSyncEpoch)throw Error('Account changed');
@@ -4436,6 +4422,73 @@ async function clubSyncInit(){
  window.addEventListener('online',()=>clubSyncSchedule(0));window.addEventListener('offline',()=>clubSyncText('offline'));
  window.addEventListener('focus',()=>clubSyncSchedule(0));document.addEventListener('focusout',()=>clubSyncSchedule());
 }
+
+/* Round-average scoring. Historical operations remain reversible. */
+const AVG_MODEL='court-average-v1';
+function avgRules(){return {scoringModel:AVG_MODEL,courtBase:[30,25,20,15,10,5],placementBonus:[8,6,4,2,0],fivePlayers:true};}
+function avgEnabled(d=sess){return (d.ruleSnapshot||S.cfg).scoringModel===AVG_MODEL;}
+function avgRating(p){return p.roundsPlayed>0?(p.pts||0)/p.roundsPlayed:0;}
+function avgCompare(a,b){return avgRating(b)-avgRating(a)||S.players.indexOf(a)-S.players.indexOf(b);}
+function avgBase(ci,d=sess){const b=(d.ruleSnapshot||S.cfg).courtBase||avgRules().courtBase;return b[Math.min(ci,b.length-1)];}
+function avgCourtLabel(ci,m){return avgEnabled()?avgBase(ci)+' base pts':m.toFixed(2)+'x';}
+function avgMigrate(){if(S.cfg.scoringModel!==AVG_MODEL){S.cfg={...S.cfg,...avgRules(),showUp:0,perGame:0,perLoss:0,absentPenalty:0};}S.players.forEach(p=>{p.roundsPlayed=p.roundsPlayed||0;});}
+function avgRoundOrder(court,games,points,d=sess){return court.slice().sort((a,b)=>(games[b]||0)-(games[a]||0)||(points[b]||0)-(points[a]||0)||((d.startRanks?.[S.players[a]._clubId]??a)-(d.startRanks?.[S.players[b]._clubId]??b)));}
+function avgRoundValue(court,ci,pi,r,d=sess){const order=avgRoundOrder(court,d[r+'g']||{},d[r+'p']||{},d),place=order.indexOf(pi);return avgBase(ci,d)+((d.ruleSnapshot||S.cfg).placementBonus||[8,6,4,2,0])[place];}
+function avgValidate(d,rounds=['r1','r2']){
+ if(!avgEnabled(d))throw Error('This draft uses the old scoring rules. Cancel it and start a new session to use round-average scoring.');
+ for(const r of rounds){const courts=d[r+'courts']||[];if(!courts.length)throw Error('Set courts for '+r.toUpperCase()+'.');const seen=new Set();
+ for(const [ci,court] of courts.entries()){
+ if(![4,5].includes(court.length))throw Error('Court '+(ci+1)+' needs 4 or 5 players. Adjust the courts before continuing.');
+ let wins=0;
+ for(const pi of court){if(seen.has(pi))throw Error('A player is assigned to two courts.');seen.add(pi);const w=d[r+'g']?.[pi],p=d[r+'p']?.[pi];if(!Number.isInteger(w)||w<0||w>court.length-1||!Number.isInteger(p)||p<11*w||p>11*(court.length-1)||p>11*w+10*(court.length-1-w))throw Error(r.toUpperCase()+' · '+S.players[pi].name+': enter wins and total game points for all games to 11.');wins+=w;}
+ if(wins!==(court.length===4?6:10))throw Error(r.toUpperCase()+' · Court '+(ci+1)+': the wins must total '+(court.length===4?6:10)+'. Use the scoresheet to calculate them.');
+ }}return true;
+}
+const avgOldResults=clubResults;
+clubResults=function(d){if(!avgEnabled(d))return avgOldResults(d);avgValidate(d);const summary=[],ops=[],fill=new Set(d.fillIns||[]);
+ for(const pi of d.present){const p=S.players[pi],row={playerId:p._clubId,name:p.name,total:0,requestedTotal:0,wins:0,losses:0,ptsScored:0,ptsConceded:0,rounds:0};const parts=[];
+ if(fill.has(pi)){row.fillIn=true;row.breakdown='Coordinator fill-in — no ladder points or rounds';summary.push(row);continue;}
+ for(const r of ['r1','r2']){const courts=d[r+'courts']||[],ci=courts.findIndex(c=>c.includes(pi));if(ci<0)continue;const court=courts[ci],order=avgRoundOrder(court,d[r+'g'],d[r+'p'],d),place=order.indexOf(pi)+1,base=avgBase(ci,d),bonus=(d.ruleSnapshot||S.cfg).placementBonus[place-1];row.rounds++;row.total+=base+bonus;row.wins+=d[r+'g'][pi];row.losses+=court.length-1-d[r+'g'][pi];row.ptsScored+=d[r+'p'][pi];row.ptsConceded+=d[r+'c']?.[pi]||0;parts.push(r.toUpperCase()+': Court '+(ci+1)+' · place '+place+' · '+base+' base + '+bonus+' bonus = '+(base+bonus));}
+ row.requestedTotal=row.total;row.breakdown=parts.join(' | ');row.baseBreakdown=row.breakdown;summary.push(row);ops.push({id:p._clubId,delta:row.total,rounds:row.rounds});}
+ return {summary,ops};};
+const avgOldReplay=clubReplay;
+clubReplay=function(){const h=clubHistory();if(S.cfg.scoringModel!==AVG_MODEL)return avgOldReplay();const totals={...h.base},rounds={...(h.roundsBase||{})};
+ const ranks=roster=>Object.fromEntries(roster.map((p,i)=>({...p,i})).sort((a,b)=>((rounds[b.id]||0)?(totals[b.id]||0)/rounds[b.id]:0)-((rounds[a.id]||0)?(totals[a.id]||0)/rounds[a.id]:0)||a.i-b.i).map((p,i)=>[p.id,i+1]));
+ for(const e of h.events){if(!e.active)continue;if(e.kind==='session')e.beforeRanks=ranks(e.roster);
+ for(const op of e.ops){const before=totals[op.id]||0;totals[op.id]=op.set!==undefined?Math.max(0,clubRound(op.set)):Math.max(0,clubRound(before+op.delta));rounds[op.id]=Math.max(0,(rounds[op.id]||0)+(op.rounds||0));const row=e.log?.summary?.find(x=>x.playerId===op.id);if(row){row.beforePoints=before;row.afterPoints=totals[op.id];row.total=clubRound(totals[op.id]-before);row.afterAverage=rounds[op.id]?totals[op.id]/rounds[op.id]:0;}}
+ if(e.kind==='session'){e.afterRanks=ranks(e.roster);e.log.rankSnapshot=Object.fromEntries(e.roster.map(p=>[p.name,e.afterRanks[p.id]]));e.log.rankSnapshotIds={...e.afterRanks};}}
+ S.players.forEach(p=>{p.pts=totals[p._clubId]||0;p.roundsPlayed=rounds[p._clubId]||0;});h.last=Object.fromEntries(S.players.map(p=>[p._clubId,p.pts]));S.log=[...h.events.filter(e=>e.active&&e.log).map(e=>clubClone(e.log)).reverse(),...S.log.filter(l=>!l._clubEvent)];if(sess.phase===4&&sess.lastEventId){const e=h.events.find(e=>e.id===sess.lastEventId&&e.active);if(e)sess.lastSummary=clubClone(e.log.summary);}};
+clubSeedOrder=function(present){const order=present.slice().sort((a,b)=>avgCompare(S.players[a],S.players[b]));const overrides=present.filter(i=>Number.isInteger(sess.seedPositions?.[S.players[i]._clubId])).sort((a,b)=>sess.seedPositions[S.players[a]._clubId]-sess.seedPositions[S.players[b]._clubId]);for(const i of overrides){order.splice(order.indexOf(i),1);order.splice(Math.max(0,Math.min(order.length,sess.seedPositions[S.players[i]._clubId]-1)),0,i);}return order;};
+clubPlacementReview=function(){if(!sess.present?.length)return '';clubHistory();return '<details class="card"><summary>Admin: adjust starting positions</summary><p class="club-helper">Default order is ladder average. Unplayed players use your roster order. Overrides apply to this session only.</p>'+sess.present.map(i=>'<label class="club-placement-row">'+esc(S.players[i].name)+'<select aria-label="Starting position" onchange="clubSetSeed('+i+',this.value)"><option value="">Automatic</option>'+sess.present.map((_,k)=>'<option value="'+(k+1)+'" '+(sess.seedPositions?.[S.players[i]._clubId]===k+1?'selected':'')+'>'+(k+1)+'</option>').join('')+'</select></label>').join('')+'</details>';};
+compare=function(a,b,g,p){return(g[b]||0)-(g[a]||0)||(p[b]||0)-(p[a]||0)||((sess.startRanks?.[S.players[a]._clubId]??a)-(sess.startRanks?.[S.players[b]._clubId]??b));};
+sortedRank=function(pi){const p=S.players[pi];return S.players.filter(x=>playerLevel(x)===playerLevel(p)).sort(avgCompare).indexOf(p);};
+const avgOldStartR1=startR1;
+startR1=function(){const courts=makeCourts(sess.present,sess.courtSizes);if(!courts.length||courts.some(c=>![4,5].includes(c.length))){alert('Set each court to 4 or 5 players before starting.');return;}avgOldStartR1();};
+const avgOldRotation=goRotation;
+goRotation=function(){try{avgValidate(sess,['r1']);}catch(e){alert(e.message);return;}sess.rotationCount=1;avgOldRotation();};
+const avgOldFinish=finishSession;
+finishSession=function(){try{avgValidate(sess);}catch(e){alert(e.message);return;}return avgOldFinish();};
+const avgOldCorrection=clubSaveCorrection;
+clubSaveCorrection=function(){try{avgValidate(sess);}catch(e){alert(e.message);return;}return avgOldCorrection();};
+const avgOldApplySheet=applyScoresheet;
+applyScoresheet=function(){if(sess.scoresheet&&avgEnabled()){for(const r of sess.scoresheet.rounds){const a=Number(r.t1),b=Number(r.t2);if(r.t1===''||r.t2===''||Math.max(a,b)!==11||Math.min(a,b)<0||Math.min(a,b)>=11){alert('Each game must finish 11–0 through 11–10.');return;}}}return avgOldApplySheet();};
+const avgOldStartR2=startR2;
+startR2=function(){const courts=sess.r2courtsManual||computeR2Courts(sess.r1courts,sess.r1g,sess.r1p,sess.dropouts,1);if(courts.some(c=>![4,5].includes(c.length))){alert('Adjust round 2 courts to 4 or 5 players before continuing.');return;}sess.rotationCount=1;avgOldStartR2();};
+const avgOldSetScore=setScore;
+setScore=function(key,pi,val,ci,r){if(!avgEnabled())return avgOldSetScore(key,pi,val,ci,r);const n=Number(val);if(sess.savedSheets)delete sess.savedSheets[r+'-'+ci];if(val.trim()==='')delete sess[key][pi];else sess[key][pi]=n;const courts=sess[r+'courts'];for(const [courtIndex,court] of courts.entries())for(const j of court){const el=document.getElementById('prev-'+r+'-'+j)?.querySelector('span:last-child');if(el)el.textContent='+'+avgRoundValue(court,courtIndex,j,r);}save();};
+renderSettings=function(){avgMigrate();document.getElementById('settings-area').innerHTML='<div class="card"><h3>Round-average ladder scoring</h3><p class="club-helper">Two rounds per session. Each game is to 11. Each player partners with everyone on their court.</p><table style="width:100%;margin:16px 0"><thead><tr><th>Court</th><th>Base points per round</th></tr></thead><tbody>'+S.cfg.courtBase.map((b,i)=>'<tr><td style="padding:8px">Court '+(i+1)+(i===5?' and higher':'')+'</td><td>'+b+'</td></tr>').join('')+'</tbody></table><p>Placement bonuses: 1st +8 · 2nd +6 · 3rd +4 · 4th +2 · 5th +0.</p><p class="club-helper">Placement: wins, then total game points. Exact ties use current ladder average, then roster order. First moves up one court; last moves down. Court 1 winner and bottom-court last place stay.</p><p class="club-helper">Ladder rating = total points ÷ rounds played. Absences do not change either number. No attendance bonus, loss deduction, multiplier, or provisional catch-up bonus.</p></div><div class="card"><h3>New season</h3><p class="club-helper">Reset totals and rounds across all four ladders. Players, skill ratings and settings stay. Download a backup first to keep the previous season.</p><button class="btn" onclick="downloadBackup()">Download season backup</button> <button class="btn btn-danger" onclick="avgSeasonReset()">Reset new season</button></div>';};
+const avgOldRenderAll=renderAll;renderAll=function(){avgMigrate();avgOldRenderAll();};
+function avgSizes(n){for(let courts=Math.floor(n/4);courts>=1;courts--){const extra=n-4*courts;if(extra<=courts)return Array.from({length:courts},(_,i)=>4+(i>=courts-extra?1:0));}return n?[n]:[];}
+autoFillCourtSizes=function(){sess.courtSizes=avgSizes(sess.present.length);save();renderSession();};
+const avgOldPicker=renderPlayerPicker;renderPlayerPicker=function(el){if(sess.present.length&&!sess.courtSizes.length)sess.courtSizes=avgSizes(sess.present.length);return avgOldPicker(el);};
+const avgOldTogglePresent=togglePresent;togglePresent=function(i,checked){sess.courtSizes=[];avgOldTogglePresent(i,checked);};
+const avgOldSelectAll=selAll;selAll=function(){sess.courtSizes=[];avgOldSelectAll();};
+clubRatingControls=function(p,i){return '<div class="club-rating-controls"><label>Skill rating <input type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5" value="'+(clubRating(p.skillRating)??'')+'" onchange="clubSetRating('+i+',this.value,this)"></label><span class="club-helper">'+(p.roundsPlayed||0)+' rounds · '+(p.pts||0)+' total points</span></div>';};
+clubIsProvisional=function(){return false;};
+function avgSeasonReset(){showTab('settings');resetPointsOnly();const box=document.getElementById('club-reset-confirm');const details=box?.closest('details');if(details)details.open=true;box?.scrollIntoView({block:'center',behavior:'smooth'});}
+// Manual adjustments change the numerator only; no round is invented.
+const avgOldEditPoints=editPoints;editPoints=function(pi){if(!(S.players[pi]?.roundsPlayed>0)){alert('This player has no completed rounds yet. Record a round before adjusting their total points; an average needs a rounds-played count.');return;}return avgOldEditPoints(pi);};
+const avgOldStartSession=startSession;startSession=function(wi,day,level){avgMigrate();avgOldStartSession(wi,day,level);sess.startRanks=Object.fromEntries(S.players.filter(p=>playerLevel(p)===level).slice().sort(avgCompare).map((p,i)=>[p._clubId,i]));save();};
 
 initTheme();
 load().then(clubSyncInit).catch(e=>clubSyncText('offline',e));
