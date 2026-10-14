@@ -867,6 +867,20 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
 #tab-ladder .club-roster-search:focus-within{outline:none;border-color:var(--text-strong);box-shadow:0 0 0 1px var(--text-strong)}
 #tab-ladder .club-roster-search #ladder-player-search{flex:1;min-width:0;margin:0;padding:12px 0;border:0;border-radius:0;outline:none;box-shadow:none;background:transparent;color:var(--text-main);font-family:var(--font-sans);font-size:16px;line-height:1.4}
 #tab-ladder .club-roster-search #ladder-player-search:focus{outline:none;border:0;box-shadow:none}
+</style><style>
+.club-profile-section{padding:18px 0;border-bottom:1px solid var(--border)}
+.club-profile-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(110px,1fr);gap:14px;align-items:start}
+.club-profile-fields label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:600;color:var(--text-main);min-width:0}
+.club-profile-editor .club-profile-fields input,.club-profile-editor .club-profile-fields select{box-sizing:border-box;width:100%;min-width:0;height:46px;margin:0;padding:10px 12px;font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--text-main);background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.club-profile-section .mini-label{margin-bottom:14px}
+#profile-player-message:empty{display:none}
+.club-profile-save{display:flex;justify-content:flex-end;margin-top:14px}
+.club-profile-editor .btn{font-size:13px;min-height:42px;padding:10px 14px}
+.club-profile-section .club-helper{font-size:12px;line-height:1.5;margin:10px 0}
+.club-profile-membership{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px}
+.club-profile-more{padding-top:14px}.club-profile-more>summary{font-size:12px;font-weight:600;color:var(--text-muted);cursor:pointer;padding:6px 0}
+.club-profile-more .club-helper{font-size:12px}.club-profile-extra{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:520px){.club-profile-fields{grid-template-columns:minmax(0,1fr)}.club-profile-editor .club-profile-fields input,.club-profile-editor .club-profile-fields select{font-size:16px}.club-profile-save .btn{width:100%}.club-profile-extra{flex-direction:column}}
 </style></head>
 <body>
 
@@ -4571,8 +4585,19 @@ function clubSearchLadder(value){
 }
 function clubProfileEditor(p,i){
  const roster=S.players.filter(x=>playerLevel(x)===playerLevel(p)).sort(avgCompare);
- const position=roster.every(x=>!x.roundsPlayed)?'<label>Starting position<select onchange="clubProfileAction('+i+',\'position\',Number(this.value))">'+roster.map((x,n)=>'<option value="'+n+'" '+(x===p?'selected':'')+'>'+(n+1)+'</option>').join('')+'</select></label>':'';
- return '<details class="club-profile-editor"><summary class="btn">Edit player</summary><div class="club-player-edit-fields" style="margin-top:14px"><label>Name<input id="profile-player-name" value="'+esc(p.name)+'"></label><label>Skill rating<input id="profile-player-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" value="'+(clubRating(p.skillRating)??'')+'"></label></div><p id="profile-player-message" role="status"></p><button class="btn btn-primary" onclick="clubSaveProfile('+i+')">Save details</button><div class="btn-row">'+(clubOtherDayExists(p)?'<span>Enrolled both days</span>':'<button class="btn" onclick="clubProfileAction('+i+',\'other\')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>')+'<button class="btn" onclick="clubProfileAction('+i+',\'coordinator\')">'+(p.coordinator?'Remove coordinator':'Make coordinator')+'</button></div><label>Move to ladder<select onchange="clubProfileAction('+i+',\'level\',this.value)">'+LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).schedule+' · '+lvl(id).short)+'</option>').join('')+'</select></label>'+position+'<p class="club-helper">Moving transfers this player’s record. Adding the other day keeps separate points.</p><button class="btn btn-danger" onclick="clubProfileAction('+i+',\'remove\')">Remove player</button></details>';
+ const position=roster.every(x=>!x.roundsPlayed)?`<label>Starting position<select onchange="clubProfileAction(${i},'position',Number(this.value))">${roster.map((x,n)=>'<option value="'+n+'" '+(x===p?'selected':'')+'>'+(n+1)+'</option>').join('')}</select></label>`:'';
+ return `<details class="club-profile-editor"><summary class="btn">Edit player</summary>
+ <div class="club-profile-section">
+ <div class="club-profile-fields"><label>Name<input type="text" id="profile-player-name" autocomplete="name" value="${esc(p.name)}"></label><label>Skill rating<input id="profile-player-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" value="${clubRating(p.skillRating)??''}"></label></div>
+ <p id="profile-player-message" role="status"></p><div class="club-profile-save"><button class="btn btn-primary" onclick="clubSaveProfile(${i})">Save details</button></div>
+ </div>
+ <div class="club-profile-section"><div class="mini-label">Ladder membership</div>
+ <div class="club-profile-fields"><label>Current ladder<select onchange="clubProfileAction(${i},'level',this.value)">${LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).schedule+' · '+lvl(id).short)+'</option>').join('')}</select></label>${position}</div>
+ <p class="club-helper">Ladder and position changes save automatically.</p>
+ <div class="club-profile-membership">${clubOtherDayExists(p)?'<span class="club-both-days">Enrolled both days</span>':`<button class="btn" onclick="clubProfileAction(${i},'other')">+ Add ${lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday'}</button><span class="club-helper">Separate points for each day.</span>`}</div>
+ </div>
+ <details class="club-profile-more"><summary>More options</summary><p class="club-helper">Changing the current ladder transfers this player’s record.</p><div class="club-profile-extra"><button class="btn" onclick="clubProfileAction(${i},'coordinator')">${p.coordinator?'Remove coordinator':'Make coordinator'}</button><button class="btn btn-danger" onclick="clubProfileAction(${i},'remove')">Remove player</button></div></details>
+ </details>`;
 }
 async function clubSaveProfile(i){
  const p=S.players[i];if(!p)return;
