@@ -862,7 +862,7 @@ body.dark[data-holiday]{--page-bg:var(--holiday-dark);--page-bg-top:var(--holida
 body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 0,transparent 36%),linear-gradient(125deg,var(--holiday-ink),var(--holiday-dark));}body[data-holiday] .hero::before,body[data-holiday] .hero::after{display:none}body[data-holiday] .court-header{background:var(--holiday-ink)}body[data-holiday] .court-header .mult-badge{background:var(--holiday-accent)!important;color:var(--holiday-ink)!important}body[data-holiday] .tab.active,body[data-holiday] .btn-primary{background:var(--holiday-accent);color:var(--holiday-ink);border-color:var(--holiday-accent)}body[data-holiday] .ladder-row:first-child .avatar{background:var(--holiday-paper)!important;color:var(--holiday-ink)!important;border-color:var(--holiday-ink)}body[data-holiday] .day-btn,body[data-holiday] .week-card,body[data-holiday] .club-ladder-card{border-top-color:var(--holiday-ink)}body[data-holiday] .mini-label{color:var(--text-main)}
 @media print{.club-theme-hint,.club-theme-dialog{display:none!important}}
 
-</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style><style>.club-event-enroll{padding:14px;margin:8px 0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft)}.club-event-enroll-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;margin-top:12px}.club-event-enroll-fields label{font-size:12px;font-weight:600;min-width:0}.club-event-enroll-fields input{width:100%;min-width:0;margin-top:6px}@media(max-width:400px){.club-event-enroll-fields{grid-template-columns:1fr}}</style><style>.club-order-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;color:var(--text-main);font-size:12px}.club-order-controls{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:flex-end}.club-order-controls .btn{min-width:44px;min-height:44px;padding:8px}.club-order-controls select{width:72px;min-height:44px;font-size:16px;padding:8px}.club-order-controls label{display:flex;align-items:center;gap:8px;font-size:13px}</style></head>
+</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style><style>.club-event-enroll{padding:14px;margin:8px 0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft)}.club-event-enroll-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;margin-top:12px}.club-event-enroll-fields label{font-size:12px;font-weight:600;min-width:0}.club-event-enroll-fields input{width:100%;min-width:0;margin-top:6px}@media(max-width:400px){.club-event-enroll-fields{grid-template-columns:1fr}}</style><style>.club-order-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;color:var(--text-main);font-size:12px}.club-order-controls{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:flex-end}.club-order-controls .btn{min-width:44px;min-height:44px;padding:8px}.club-order-controls select{width:72px;min-height:44px;font-size:16px;padding:8px}.club-order-controls label{display:flex;align-items:center;gap:8px;font-size:13px}</style><style>.club-ladder-add{margin-bottom:16px}.club-ladder-add>summary{display:inline-flex;cursor:pointer}.club-ladder-add .club-add-player{margin-top:12px}#tab-ladder .club-roster-search input{width:100%;border:0;background:transparent;font-size:16px;min-height:46px}#tab-ladder .club-roster-search{margin-bottom:20px}.club-profile-editor{padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border)}.club-profile-editor input,.club-profile-editor select{font-size:16px;max-width:100%}.club-profile-editor>label{display:flex;flex-direction:column;gap:8px}.club-profile-editor summary{cursor:pointer}</style></head>
 <body>
 
 <!-- PASSCODE LOCK SCREEN -->
@@ -928,7 +928,6 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
 <div class="tabs">
     <button class="tab active" onclick="showTab('ladder')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8v5a4 4 0 0 1-8 0V3Z"/><path d="M8 5H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4M12 12v6m-4 3h8m-8 0v-3h8v3"/></svg><span>Ladder</span></button>
     <button class="tab" onclick="showTab('session')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18m-12 4h2m3 0h2m-8 3h2"/></svg><span>Events</span></button>
-    <button class="tab" onclick="showTab('players')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3m1-16a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v2"/></svg><span>Players</span></button>
     <button class="tab" onclick="showTab('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 3v6m8 0v6m-8 0v6"/></svg><span>Settings</span></button>
     <button class="tab" onclick="showTab('log')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11a9 9 0 1 1 2 7M3 4v7h7m2-4v5l3 2"/></svg><span>History</span></button>
     <button class="tab" onclick="showTab('backup')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18H5a4 4 0 0 1-.5-8A7 7 0 0 1 18 8a5 5 0 0 1 1 10h-2M12 12v9m-3-3 3 3 3-3"/></svg><span>Backup</span></button>
@@ -936,6 +935,19 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
 
   <!-- LADDER -->
   <div id="tab-ladder" class="panel active">
+<details class="club-ladder-add"><summary class="btn btn-primary">+ Add player</summary>    <div class="card club-add-player">
+      <div class="mini-label">Roster</div><h3>Add a player</h3>
+      <div class="club-add-fields">
+        <label for="new-name">Player name<input type="text" id="new-name" placeholder="First and last name" autocomplete="off"></label>
+        <label for="new-level">Ladder<select id="new-level"><option value="both_upper">Both Days · Men’s</option><option value="both_lower">Both Days · Women’s</option><option value="upper">Tues Evening · Men’s</option><option value="lower">Tues Evening · Women’s</option><option value="wed_upper">Wed Morning · Men’s</option><option value="wed_lower">Wed Morning · Women’s</option></select></label>
+        <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
+      </div>
+      <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
+      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" disabled hidden><span><strong>Average-based ranking</strong><small>Only played rounds count toward each player’s average.</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
+      <p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
+    </div>
+</details>
+<div class="club-roster-search"><input id="ladder-player-search" type="search" placeholder="Search players…" aria-label="Search ladder players" oninput="clubSearchLadder(this.value)"></div>
     <div class="card soft welcome-card" style="margin-bottom:14px;">
       <div class="welcome-icon">🏆</div>
       <div style="flex:1;">
@@ -967,17 +979,6 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
 
   <!-- PLAYERS -->
   <div id="tab-players" class="panel">
-    <div class="card club-add-player">
-      <div class="mini-label">Roster</div><h3>Add a player</h3>
-      <div class="club-add-fields">
-        <label for="new-name">Player name<input type="text" id="new-name" placeholder="First and last name" autocomplete="off"></label>
-        <label for="new-level">Ladder<select id="new-level"><option value="both_upper">Both Days · Men’s</option><option value="both_lower">Both Days · Women’s</option><option value="upper">Tues Evening · Men’s</option><option value="lower">Tues Evening · Women’s</option><option value="wed_upper">Wed Morning · Men’s</option><option value="wed_lower">Wed Morning · Women’s</option></select></label>
-        <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
-      </div>
-      <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
-      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" disabled hidden><span><strong>Average-based ranking</strong><small>Only played rounds count toward each player’s average.</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
-      <p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
-    </div>
     <div id="player-search-box" class="club-roster-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
       <input type="search" id="player-search-input" placeholder="Search players…" aria-label="Search players" oninput="filterPlayerList(this.value)">
@@ -1337,7 +1338,8 @@ function ensureCurrentWeek(){
 
 /* ====== Tabs ====== */
 function showTab(t){
-  const tabs=['ladder','session','players','settings','log','backup'];
+  if(t==='players')t='ladder';
+  const tabs=['ladder','session','settings','log','backup'];
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',tabs[i]===t));
   document.querySelectorAll('.panel').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+t).classList.add('active');
@@ -2854,6 +2856,7 @@ function applyPenalty(){ /* Absence deductions are disabled. */ }
 /* ====== Ladder ====== */
 function renderLadder(){
   LADDER_IDS.forEach(renderOneLadder);
+  clubSearchLadder(document.getElementById('ladder-player-search')?.value||'');
   updateDashboard();
 }
 
@@ -2892,7 +2895,7 @@ function renderOneLadder(level){
     const barW=Math.max(3,Math.round(((p.pts||0)/maxPts)*100));
     const rankClass=i===0?'gold':i===1?'silver':i===2?'bronze':'';
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
-    return`<div class="ladder-row ladder-row-clickable" onclick="showPlayerStats(${origIdx})" title="View player stats">
+    return`<div class="ladder-row ladder-row-clickable" data-player-name="${esc(p.name.toLowerCase())}" onclick="showPlayerStats(${origIdx})" title="View player stats">
       <span class="lrank ${rankClass}">${String(i+1).padStart(2,'0')}</span>
       <div class="avatar" style="background:${c.bg};color:${c.tx}" aria-label="${clubRating(p.skillRating)===null?'Unrated':'Skill rating '+clubRating(p.skillRating).toFixed(1)}" title="${clubRating(p.skillRating)===null?'Unrated':'Skill rating'}">${clubRating(p.skillRating)===null?'—':clubRating(p.skillRating).toFixed(1)}</div>
       <div style="flex:1;min-width:0">
@@ -3052,6 +3055,7 @@ function showPlayerStats(playerIndex){
       <button class="btn btn-sm" onclick="closePlayerStats()" aria-label="Close" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.35);color:#fff;">✕</button>
     </div>
     <div class="player-stats-body">
+      ${clubProfileEditor(p,playerIndex)}
       <div class="stats-grid">
         <div class="stat-item"><div class="stat-num">${stats.sessions}</div><div class="stat-cap">Sessions</div></div>
         <div class="stat-item"><div class="stat-num">${stats.matches}</div><div class="stat-cap">Matches</div></div>
@@ -4553,6 +4557,36 @@ async function clubMoveOrder(level,index,target){
  // Store positions without changing array indices used by sessions and history.
  players.forEach((p,i)=>{p.startOrder=i;p.initialSkillPlacement=false;});
  await save();renderAll();
+}
+
+
+function clubSearchLadder(value){
+ const q=String(value||'').trim().toLowerCase();
+ document.querySelectorAll('#tab-ladder .ladder-row').forEach(row=>{row.style.display=(row.dataset.playerName||'').includes(q)?'':'none';});
+}
+function clubProfileEditor(p,i){
+ const roster=S.players.filter(x=>playerLevel(x)===playerLevel(p)).sort(avgCompare);
+ const position=roster.every(x=>!x.roundsPlayed)?'<label>Starting position<select onchange="clubProfileAction('+i+',\'position\',Number(this.value))">'+roster.map((x,n)=>'<option value="'+n+'" '+(x===p?'selected':'')+'>'+(n+1)+'</option>').join('')+'</select></label>':'';
+ return '<details class="club-profile-editor"><summary class="btn">Edit player</summary><div class="club-player-edit-fields" style="margin-top:14px"><label>Name<input id="profile-player-name" value="'+esc(p.name)+'"></label><label>Skill rating<input id="profile-player-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" value="'+(clubRating(p.skillRating)??'')+'"></label></div><p id="profile-player-message" role="status"></p><button class="btn btn-primary" onclick="clubSaveProfile('+i+')">Save details</button><div class="btn-row">'+(clubOtherDayExists(p)?'<span>Enrolled both days</span>':'<button class="btn" onclick="clubProfileAction('+i+',\'other\')">+ '+(lvl(playerLevel(p)).day==='tue'?'Wednesday':'Tuesday')+'</button>')+'<button class="btn" onclick="clubProfileAction('+i+',\'coordinator\')">'+(p.coordinator?'Remove coordinator':'Make coordinator')+'</button></div><label>Move to ladder<select onchange="clubProfileAction('+i+',\'level\',this.value)">'+LADDER_IDS.map(id=>'<option value="'+id+'" '+(id===playerLevel(p)?'selected':'')+'>'+esc(lvl(id).schedule+' · '+lvl(id).short)+'</option>').join('')+'</select></label>'+position+'<p class="club-helper">Moving transfers this player’s record. Adding the other day keeps separate points.</p><button class="btn btn-danger" onclick="clubProfileAction('+i+',\'remove\')">Remove player</button></details>';
+}
+async function clubSaveProfile(i){
+ const p=S.players[i];if(!p)return;
+ const name=document.getElementById('profile-player-name').value.trim().replace(/\s+/g,' ');
+ const raw=document.getElementById('profile-player-rating').value,rating=clubRating(raw);
+ const message=document.getElementById('profile-player-message');
+ if(!name){message.textContent='Enter a name.';return;}
+ if(raw!==''&&rating===null){message.textContent='Enter a rating from 1.0 to 8.0, or leave it blank.';return;}
+ if(S.players.some(x=>x!==p&&playerLevel(x)===playerLevel(p)&&clubPlayerNameKey(x.name)===clubPlayerNameKey(name))){message.textContent='That name is already in this ladder.';return;}
+ p.name=name;p.skillRating=rating;await save();renderAll();closePlayerStats();showPlayerStats(S.players.indexOf(p));
+}
+async function clubProfileAction(i,action,value){
+ const p=S.players[i];if(!p)return;
+ if(action==='position')await clubMoveOrder(playerLevel(p),i,value);
+ if(action==='other')await clubAddOtherDay(i);
+ if(action==='coordinator')toggleCoordinator(i);
+ if(action==='level')editPlayerLevel(i,value);
+ if(action==='remove')removePlayer(i);
+ closePlayerStats();if(S.players.includes(p))showPlayerStats(S.players.indexOf(p));
 }
 
 initTheme();
