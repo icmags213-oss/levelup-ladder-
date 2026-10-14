@@ -862,7 +862,7 @@ body.dark[data-holiday]{--page-bg:var(--holiday-dark);--page-bg-top:var(--holida
 body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 0,transparent 36%),linear-gradient(125deg,var(--holiday-ink),var(--holiday-dark));}body[data-holiday] .hero::before,body[data-holiday] .hero::after{display:none}body[data-holiday] .court-header{background:var(--holiday-ink)}body[data-holiday] .court-header .mult-badge{background:var(--holiday-accent)!important;color:var(--holiday-ink)!important}body[data-holiday] .tab.active,body[data-holiday] .btn-primary{background:var(--holiday-accent);color:var(--holiday-ink);border-color:var(--holiday-accent)}body[data-holiday] .ladder-row:first-child .avatar{background:var(--holiday-paper)!important;color:var(--holiday-ink)!important;border-color:var(--holiday-ink)}body[data-holiday] .day-btn,body[data-holiday] .week-card,body[data-holiday] .club-ladder-card{border-top-color:var(--holiday-ink)}body[data-holiday] .mini-label{color:var(--text-main)}
 @media print{.club-theme-hint,.club-theme-dialog{display:none!important}}
 
-</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style><style>.club-event-enroll{padding:14px;margin:8px 0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft)}.club-event-enroll-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;margin-top:12px}.club-event-enroll-fields label{font-size:12px;font-weight:600;min-width:0}.club-event-enroll-fields input{width:100%;min-width:0;margin-top:6px}@media(max-width:400px){.club-event-enroll-fields{grid-template-columns:1fr}}</style></head>
+</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style><style>.club-event-enroll{padding:14px;margin:8px 0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft)}.club-event-enroll-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;margin-top:12px}.club-event-enroll-fields label{font-size:12px;font-weight:600;min-width:0}.club-event-enroll-fields input{width:100%;min-width:0;margin-top:6px}@media(max-width:400px){.club-event-enroll-fields{grid-template-columns:1fr}}</style><style>.club-order-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0;color:var(--text-main);font-size:12px}.club-order-controls{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:flex-end}.club-order-controls .btn{min-width:44px;min-height:44px;padding:8px}.club-order-controls select{width:72px;min-height:44px;font-size:16px;padding:8px}.club-order-controls label{display:flex;align-items:center;gap:8px;font-size:13px}</style></head>
 <body>
 
 <!-- PASSCODE LOCK SCREEN -->
@@ -2885,7 +2885,8 @@ function renderOneLadder(level){
   }
   const sorted=[...players].sort((a,b)=>avgCompare(a.p,b.p));
   const maxPts=Math.max(1,sorted[0]?.p.pts||1);
-  el.innerHTML=`<div class="card">${sorted.map((entry,i)=>{
+  const canArrange=players.every(x=>!x.p.roundsPlayed);
+  el.innerHTML=`<div class="card">${canArrange?'<div class="club-order-toolbar no-print"><button class="btn" onclick="clubToggleOrder(\''+level+'\')">'+(clubOrderEditing===level?'Done arranging':'Arrange players')+'</button><span>Set starting order · points stay unchanged</span></div>':''}${sorted.map((entry,i)=>{
     const p=entry.p,origIdx=entry.i;
     const c=col(origIdx);
     const barW=Math.max(3,Math.round(((p.pts||0)/maxPts)*100));
@@ -2904,6 +2905,7 @@ function renderOneLadder(level){
         </div>
       </div>
       <span class="lrow-chevron no-print" aria-hidden="true">›</span>
+      ${canArrange&&clubOrderEditing===level?`<div class="club-order-controls no-print" onclick="event.stopPropagation()"><button class="btn" aria-label="Move ${esc(p.name)} up" ${i===0?'disabled':''} onclick="clubMoveOrder('${level}',${origIdx},${i-1})">↑</button><label>Position <select aria-label="Position for ${esc(p.name)}" onchange="clubMoveOrder('${level}',${origIdx},Number(this.value))">${sorted.map((_,n)=>'<option value="'+n+'" '+(n===i?'selected':'')+'>'+(n+1)+'</option>').join('')}</select></label><button class="btn" aria-label="Move ${esc(p.name)} down" ${i===sorted.length-1?'disabled':''} onclick="clubMoveOrder('${level}',${origIdx},${i+1})">↓</button></div>`:''}
     </div>`;
   }).join('')}</div>`;
 }
@@ -4429,7 +4431,7 @@ const AVG_MODEL='court-average-v1';
 function avgRules(){return {scoringModel:AVG_MODEL,courtBase:[30,25,20,15,10,5],placementBonus:[8,6,4,2,0],fivePlayers:true};}
 function avgEnabled(d=sess){return (d.ruleSnapshot||S.cfg).scoringModel===AVG_MODEL;}
 function avgRating(p){return p.roundsPlayed>0?(p.pts||0)/p.roundsPlayed:0;}
-function avgCompare(a,b){return avgRating(b)-avgRating(a)||S.players.indexOf(a)-S.players.indexOf(b);}
+function avgCompare(a,b){return avgRating(b)-avgRating(a)||(a.startOrder??S.players.indexOf(a))-(b.startOrder??S.players.indexOf(b))||S.players.indexOf(a)-S.players.indexOf(b);}
 function avgBase(ci,d=sess){const b=(d.ruleSnapshot||S.cfg).courtBase||avgRules().courtBase;return b[Math.min(ci,b.length-1)];}
 function avgCourtLabel(ci,m){return avgEnabled()?avgBase(ci)+' base pts':m.toFixed(2)+'x';}
 function avgMigrate(){if(S.cfg.scoringModel!==AVG_MODEL){S.cfg={...S.cfg,...avgRules(),showUp:0,perGame:0,perLoss:0,absentPenalty:0};}S.players.forEach(p=>{p.roundsPlayed=p.roundsPlayed||0;});}
@@ -4538,6 +4540,19 @@ async function clubEventEnroll(raw,rating,fromForm){
   sess.pickerSearch=S.players[i].name;clubEventNew=null;clubHistory();
   await save();renderAll();renderSession();
  }catch(e){error('Could not finish saving. The player may already be listed—check before trying again.');}finally{clubEventSaving=false;}
+}
+
+
+let clubOrderEditing=null;
+function clubToggleOrder(level){clubOrderEditing=clubOrderEditing===level?null:level;renderLadder();}
+async function clubMoveOrder(level,index,target){
+ const players=S.players.filter(p=>playerLevel(p)===level).slice().sort(avgCompare);
+ const player=S.players[index];
+ if(!player||players.some(p=>p.roundsPlayed>0)||!players.includes(player)||!Number.isInteger(target)||target<0||target>=players.length)return;
+ players.splice(players.indexOf(player),1);players.splice(target,0,player);
+ // Store positions without changing array indices used by sessions and history.
+ players.forEach((p,i)=>{p.startOrder=i;p.initialSkillPlacement=false;});
+ await save();renderAll();
 }
 
 initTheme();
