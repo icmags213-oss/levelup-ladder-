@@ -862,7 +862,7 @@ body.dark[data-holiday]{--page-bg:var(--holiday-dark);--page-bg-top:var(--holida
 body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 0,transparent 36%),linear-gradient(125deg,var(--holiday-ink),var(--holiday-dark));}body[data-holiday] .hero::before,body[data-holiday] .hero::after{display:none}body[data-holiday] .court-header{background:var(--holiday-ink)}body[data-holiday] .court-header .mult-badge{background:var(--holiday-accent)!important;color:var(--holiday-ink)!important}body[data-holiday] .tab.active,body[data-holiday] .btn-primary{background:var(--holiday-accent);color:var(--holiday-ink);border-color:var(--holiday-accent)}body[data-holiday] .ladder-row:first-child .avatar{background:var(--holiday-paper)!important;color:var(--holiday-ink)!important;border-color:var(--holiday-ink)}body[data-holiday] .day-btn,body[data-holiday] .week-card,body[data-holiday] .club-ladder-card{border-top-color:var(--holiday-ink)}body[data-holiday] .mini-label{color:var(--text-main)}
 @media print{.club-theme-hint,.club-theme-dialog{display:none!important}}
 
-</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style></head>
+</style><style>.club-average-meta{font-size:11px;color:var(--text-muted);margin-top:5px}.club-player-points strong{font-size:18px}.club-average-admin{display:flex;gap:8px;flex-wrap:wrap}</style><style>.club-event-enroll{padding:14px;margin:8px 0 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface-soft)}.club-event-enroll-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(100px,1fr);gap:12px;margin-top:12px}.club-event-enroll-fields label{font-size:12px;font-weight:600;min-width:0}.club-event-enroll-fields input{width:100%;min-width:0;margin-top:6px}@media(max-width:400px){.club-event-enroll-fields{grid-template-columns:1fr}}</style></head>
 <body>
 
 <!-- PASSCODE LOCK SCREEN -->
@@ -1682,6 +1682,7 @@ function renderPlayerPicker(el){
     <div class="mini-label">Step 1</div>
     <h3 style="font-size:15px;font-weight:700;color:var(--text-strong);margin-bottom:10px;">Who is playing today?</h3>
     <input type="text" id="picker-search" placeholder="🔍 Search players..." value="${esc(sess.pickerSearch||'')}" oninput="updatePickerSearch(this.value)" style="width:100%;margin-bottom:10px;">
+    ${clubEventEnrollUI()}
     <div id="picker-list-wrap" style="margin-bottom:14px;">
     ${(()=>{
       const q=(sess.pickerSearch||'').trim().toLowerCase();
@@ -1696,7 +1697,7 @@ function renderPlayerPicker(el){
       if(!filtered.length){
         const allOfLevel=S.players.filter(p=>playerLevel(p)===sess.sessionLevel);
         if(!allOfLevel.length){
-          return`<p style="font-size:13px;color:var(--text-muted);">No players in the ${lvl(sess.sessionLevel).label} ladder yet. Add some on the Players tab.</p>`;
+          return`<p style="font-size:13px;color:var(--text-muted);">No players in the ${lvl(sess.sessionLevel).label} ladder yet. Use “Add a new player” above to get started.</p>`;
         }
         return`<p style="font-size:13px;color:var(--text-muted);">No players match "${esc(q)}".</p>`;
       }
@@ -4489,6 +4490,37 @@ function avgSeasonReset(){showTab('settings');resetPointsOnly();const box=docume
 // Manual adjustments change the numerator only; no round is invented.
 const avgOldEditPoints=editPoints;editPoints=function(pi){if(!(S.players[pi]?.roundsPlayed>0)){alert('This player has no completed rounds yet. Record a round before adjusting their total points; an average needs a rounds-played count.');return;}return avgOldEditPoints(pi);};
 const avgOldStartSession=startSession;startSession=function(wi,day,level){avgMigrate();avgOldStartSession(wi,day,level);sess.startRanks=Object.fromEntries(S.players.filter(p=>playerLevel(p)===level).slice().sort(avgCompare).map((p,i)=>[p._clubId,i]));save();};
+
+let clubEventNew=null,clubEventSaving=false;
+function clubEventEnrollUI(){
+ const q=(sess.pickerSearch||'').trim(),level=sess.sessionLevel;
+ const enrolled=new Set(S.players.filter(p=>playerLevel(p)===level).map(p=>clubPlayerNameKey(p.name)));
+ const seen=new Set();
+ const other=q?S.players.map((p,i)=>({p,i})).filter(({p})=>{const key=clubPlayerNameKey(p.name);if(playerLevel(p)===level||lvl(playerLevel(p)).short!==lvl(level).short||!p.name.toLowerCase().includes(q.toLowerCase())||enrolled.has(key)||seen.has(key))return false;seen.add(key);return true;}):[];
+ let html=other.length?'<div class="club-event-enroll"><strong>Players from the other day</strong><p class="club-helper">Add them to this ladder with their existing skill rating. Points stay separate.</p>'+other.map(({p,i})=>'<button type="button" class="btn btn-sm" style="margin:4px" onclick="clubEventEnrollExisting('+i+')">+ '+esc(p.name)+' · '+(clubRating(p.skillRating)??'Unrated')+'</button>').join('')+'</div>':'';
+ if(!clubEventNew||clubEventNew.level!==level)return html+'<button type="button" class="btn btn-sm" style="margin:4px 0 14px" onclick="clubEventOpenNew()">+ Add a new player</button>';
+ const a=v=>esc(String(v)).replace(/"/g,'&quot;');
+ return html+'<div class="club-event-enroll"><h4>Add to '+esc(lvl(level).label)+'</h4><div class="club-event-enroll-fields"><label>Player name<input id="event-new-name" autocomplete="off" value="'+a(clubEventNew.name)+'" oninput="clubEventNew.name=this.value"></label><label>Skill rating (optional)<input id="event-new-rating" type="number" inputmode="decimal" min="1" max="8" step="0.1" placeholder="e.g. 3.5" value="'+a(clubEventNew.rating)+'" oninput="clubEventNew.rating=this.value"></label></div><div class="btn-row"><button type="button" class="btn btn-primary" onclick="clubEventCreate()">Add & check in</button><button type="button" class="btn" onclick="clubEventNew=null;renderSession()">Cancel</button></div><p id="event-new-status" role="status" class="club-helper">'+esc(clubEventNew.message||'Creates a roster entry and checks them in for this session.')+'</p></div>';
+}
+function clubEventOpenNew(){clubEventNew={level:sess.sessionLevel,name:(sess.pickerSearch||'').trim(),rating:''};renderSession();document.getElementById('event-new-name')?.focus();}
+async function clubEventEnrollExisting(i){const p=S.players[i];if(!p)return;await clubEventEnroll(p.name,p.skillRating??'',false);}
+async function clubEventCreate(){if(!clubEventNew||clubEventNew.level!==sess.sessionLevel)return;await clubEventEnroll(clubEventNew.name,clubEventNew.rating,true);}
+async function clubEventEnroll(raw,rating,fromForm){
+ if(clubEventSaving||sess.phase!==0||sess.weekIdx<0)return;
+ const name=String(raw).trim().replace(/\s+/g,' '),level=sess.sessionLevel;
+ const error=message=>{if(fromForm&&clubEventNew){clubEventNew.message=message;renderSession();}else alert(message);};
+ if(!name){error('Enter a player name.');return;}
+ if(rating!==''&&clubRating(rating)===null){error('Enter a rating from 1.0 to 8.0, or leave it blank.');return;}
+ clubEventSaving=true;
+ try{
+  let i=S.players.findIndex(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name));
+  if(i<0){clubEnrollPlayer(name,[level],{rating,provisional:false});i=S.players.findIndex(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name));}
+  if(i<0)throw Error('Could not add the player.');
+  if(!sess.present.includes(i)){sess.present.push(i);sess.courtSizes=[];}
+  sess.pickerSearch=S.players[i].name;clubEventNew=null;clubHistory();
+  await save();renderAll();renderSession();
+ }catch(e){error('Could not finish saving. The player may already be listed—check before trying again.');}finally{clubEventSaving=false;}
+}
 
 initTheme();
 load().then(clubSyncInit).catch(e=>clubSyncText('offline',e));
