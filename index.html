@@ -3264,7 +3264,7 @@ function clubEnrollPlayer(name,levels,options={}){
  for(const level of levels){
   if(!LEVELS[level]||S.players.some(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name)))continue;
   const player={name,level,pts:0,_clubId:clubId(),skillRating:clubRating(options.rating)};
-  player.roundsPlayed=0;
+  player.roundsPlayed=0;player.initialSkillPlacement=true;
   S.players.push(player);added.push(level);
  }
  return added;
@@ -4459,8 +4459,26 @@ clubReplay=function(){const h=clubHistory();if(S.cfg.scoringModel!==AVG_MODEL)re
  for(const op of e.ops){const before=totals[op.id]||0;totals[op.id]=op.set!==undefined?Math.max(0,clubRound(op.set)):Math.max(0,clubRound(before+op.delta));rounds[op.id]=Math.max(0,(rounds[op.id]||0)+(op.rounds||0));const row=e.log?.summary?.find(x=>x.playerId===op.id);if(row){row.beforePoints=before;row.afterPoints=totals[op.id];row.total=clubRound(totals[op.id]-before);row.afterAverage=rounds[op.id]?totals[op.id]/rounds[op.id]:0;}}
  if(e.kind==='session'){e.afterRanks=ranks(e.roster);e.log.rankSnapshot=Object.fromEntries(e.roster.map(p=>[p.name,e.afterRanks[p.id]]));e.log.rankSnapshotIds={...e.afterRanks};}}
  S.players.forEach(p=>{p.pts=totals[p._clubId]||0;p.roundsPlayed=rounds[p._clubId]||0;});h.last=Object.fromEntries(S.players.map(p=>[p._clubId,p.pts]));S.log=[...h.events.filter(e=>e.active&&e.log).map(e=>clubClone(e.log)).reverse(),...S.log.filter(l=>!l._clubEvent)];if(sess.phase===4&&sess.lastEventId){const e=h.events.find(e=>e.id===sess.lastEventId&&e.active);if(e)sess.lastSummary=clubClone(e.log.summary);}};
-clubSeedOrder=function(present){const order=present.slice().sort((a,b)=>avgCompare(S.players[a],S.players[b]));const overrides=present.filter(i=>Number.isInteger(sess.seedPositions?.[S.players[i]._clubId])).sort((a,b)=>sess.seedPositions[S.players[a]._clubId]-sess.seedPositions[S.players[b]._clubId]);for(const i of overrides){order.splice(order.indexOf(i),1);order.splice(Math.max(0,Math.min(order.length,sess.seedPositions[S.players[i]._clubId]-1)),0,i);}return order;};
-clubPlacementReview=function(){if(!sess.present?.length)return '';clubHistory();return '<details class="card"><summary>Admin: adjust starting positions</summary><p class="club-helper">Default order is ladder average. Unplayed players use your roster order. Overrides apply to this session only.</p>'+sess.present.map(i=>'<label class="club-placement-row">'+esc(S.players[i].name)+'<select aria-label="Starting position" onchange="clubSetSeed('+i+',this.value)"><option value="">Automatic</option>'+sess.present.map((_,k)=>'<option value="'+(k+1)+'" '+(sess.seedPositions?.[S.players[i]._clubId]===k+1?'selected':'')+'>'+(k+1)+'</option>').join('')+'</select></label>').join('')+'</details>';};
+clubSeedOrder=function(present){const eligible=i=>S.players[i].initialSkillPlacement===true&&!S.players[i].roundsPlayed&&clubRating(S.players[i].skillRating)!==null;
+ const baseline=present.filter(i=>!eligible(i)).sort((a,b)=>avgCompare(S.players[a],S.players[b]));
+ const entries=baseline.map((i,k)=>({i,pos:k}));
+ for(const i of present.filter(eligible)){
+  const rating=clubRating(S.players[i].skillRating);
+  const peers=baseline.map((j,k)=>({j,k,r:clubRating(S.players[j].skillRating)})).filter(p=>p.r!==null&&playerLevel(S.players[p.j])===playerLevel(S.players[i]));
+  let pos=baseline.length;
+  if(peers.length){
+   const gap=Math.min(...peers.map(p=>Math.abs(p.r-rating)));
+   const closest=peers.filter(p=>Math.abs(Math.abs(p.r-rating)-gap)<1e-9);
+   const positions=closest.map(p=>p.k).sort((a,b)=>a-b);
+   const mid=Math.floor(positions.length/2);
+   const center=positions.length%2?positions[mid]:(positions[mid-1]+positions[mid])/2;
+   pos=center+(rating>closest.reduce((v,p)=>v+p.r,0)/closest.length?-.5:.5);
+  }
+  entries.push({i,pos});
+ }
+ const order=entries.sort((a,b)=>a.pos-b.pos||(clubRating(S.players[b.i].skillRating)||0)-(clubRating(S.players[a.i].skillRating)||0)||a.i-b.i).map(e=>e.i);
+ const overrides=present.filter(i=>Number.isInteger(sess.seedPositions?.[S.players[i]._clubId])).sort((a,b)=>sess.seedPositions[S.players[a]._clubId]-sess.seedPositions[S.players[b]._clubId]);for(const i of overrides){order.splice(order.indexOf(i),1);order.splice(Math.max(0,Math.min(order.length,sess.seedPositions[S.players[i]._clubId]-1)),0,i);}return order;};
+clubPlacementReview=function(){if(!sess.present?.length)return '';clubHistory();return '<details class="card"><summary>Admin: adjust starting positions</summary><p class="club-helper">New players start near attending players with a similar skill rating until they complete a round. Existing players keep their ladder-average order (roster order when tied). Without a rated comparison player, newcomers start at the end. Overrides apply to this session only.</p>'+sess.present.map(i=>'<label class="club-placement-row">'+esc(S.players[i].name)+'<select aria-label="Starting position" onchange="clubSetSeed('+i+',this.value)"><option value="">Automatic</option>'+sess.present.map((_,k)=>'<option value="'+(k+1)+'" '+(sess.seedPositions?.[S.players[i]._clubId]===k+1?'selected':'')+'>'+(k+1)+'</option>').join('')+'</select></label>').join('')+'</details>';};
 compare=function(a,b,g,p){return(g[b]||0)-(g[a]||0)||(p[b]||0)-(p[a]||0)||((sess.startRanks?.[S.players[a]._clubId]??a)-(sess.startRanks?.[S.players[b]._clubId]??b));};
 sortedRank=function(pi){const p=S.players[pi];return S.players.filter(x=>playerLevel(x)===playerLevel(p)).sort(avgCompare).indexOf(p);};
 const avgOldStartR1=startR1;
