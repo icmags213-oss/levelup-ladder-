@@ -962,7 +962,7 @@ body[data-holiday] .hero{background:radial-gradient(circle at 85% 20%,#ffffff20 
         <label for="new-rating">Skill rating <span class="club-field-optional">Optional</span><input id="new-rating" type="number" min="1" max="8" step="0.1" inputmode="decimal" placeholder="e.g. 3.5"></label>
       </div>
       <p class="club-helper club-add-hint">Choose both days to keep separate points and results in each ladder.</p>
-      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" disabled hidden><span><strong>Average-based ranking</strong><small>Only played rounds count toward each player’s average.</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
+      <div class="club-add-footer"><label class="club-provisional-check" for="new-provisional"><input id="new-provisional" type="checkbox" disabled hidden><span><strong>Average-based ranking</strong><small>Only attended sessions count toward each player’s average.</small></span></label><button class="btn btn-primary" onclick="addPlayer()">+ Add player</button></div>
       <p id="club-enroll-status" class="club-helper" role="status" aria-live="polite"></p>
     </div>
 </details>
@@ -1773,7 +1773,7 @@ function renderPlayerPicker(el){
     })()}
     </div>
     <div style="background:var(--surface-soft);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text-muted);border:1px solid var(--border-soft);">
-      Court base points + placement bonus each round. Ladder standings use average points per round.
+      Court base points + placement bonus each round. Ladder standings use average points per session.
     </div>
     <div class="btn-row">
       <button class="btn" onclick="selAll()">Select all</button>
@@ -2920,9 +2920,9 @@ function renderOneLadder(level){
       <div style="flex:1;min-width:0">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
           <span class="lname">${esc(p.name)}</span>
-          <span class="pts-pill" style="background:${c.bg};color:${c.tx}">${p.roundsPlayed?avgRating(p).toFixed(2):'—'}<span class="club-points-unit">AVG / ROUND</span></span>
+          <span class="pts-pill" style="background:${c.bg};color:${c.tx}">${p.roundsPlayed?avgRating(p).toFixed(2):'—'}<span class="club-points-unit">AVG / SESSION</span></span>
         </div>
-        <div class="club-average-meta">${p.roundsPlayed||0} rounds · ${p.pts||0} total points</div><div class="progress-bar">
+        <div class="club-average-meta">${avgSessions(p)} sessions · ${p.roundsPlayed||0} rounds · ${p.pts||0} total points</div><div class="progress-bar">
           <div class="progress-fill" style="width:${barW}%;background:${c.tx};opacity:.65;"></div>
         </div>
       </div>
@@ -3076,7 +3076,7 @@ function showPlayerStats(playerIndex){
     <div class="player-stats-body">
       ${clubProfileEditor(p,playerIndex)}
       <div class="stats-grid">
-        <div class="stat-item"><div class="stat-num">${stats.sessions}</div><div class="stat-cap">Sessions</div></div>
+        <div class="stat-item"><div class="stat-num">${avgSessions(p)}</div><div class="stat-cap">Sessions</div></div>
         <div class="stat-item"><div class="stat-num">${stats.matches}</div><div class="stat-cap">Matches</div></div>
         <div class="stat-item"><div class="stat-num">${stats.wins} <span style="font-size:13px;color:var(--text-muted);">/ ${stats.losses}</span></div><div class="stat-cap">Wins / Losses</div></div>
         <div class="stat-item"><div class="stat-num">${stats.winPct}%</div><div class="stat-cap">Win %</div></div>
@@ -3289,7 +3289,7 @@ function clubEnrollPlayer(name,levels,options={}){
  for(const level of levels){
   if(!LEVELS[level]||S.players.some(p=>playerLevel(p)===level&&clubPlayerNameKey(p.name)===clubPlayerNameKey(name)))continue;
   const player={name,level,pts:0,_clubId:clubId(),skillRating:clubRating(options.rating)};
-  player.roundsPlayed=0;player.initialSkillPlacement=true;
+  player.roundsPlayed=0;player.sessionsPlayed=0;player.initialSkillPlacement=true;
   S.players.push(player);added.push(level);
  }
  return added;
@@ -3490,7 +3490,7 @@ function downloadPublicStandings(){
     id:p._clubId,
     name:p.name,
     level:playerLevel(p),
-    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,average:avgRating(p),skillRating:p.skillRating
+    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,sessionsPlayed:avgSessions(p),average:avgRating(p),skillRating:p.skillRating
   }));
   // Pre-compute each player's stats so the standings page is fully self-contained.
   const stats={};
@@ -3532,7 +3532,7 @@ async function shareStandings(){
     id:p._clubId,
     name:p.name,
     level:playerLevel(p),
-    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,average:avgRating(p),skillRating:p.skillRating
+    pts:p.pts||0,roundsPlayed:p.roundsPlayed||0,sessionsPlayed:avgSessions(p),average:avgRating(p),skillRating:p.skillRating
   }));
   const stats={};
   S.players.forEach(p=>{
@@ -3859,7 +3859,7 @@ async function clubConfirmReset(){
  const status=document.getElementById('club-reset-status');
  if(document.getElementById('club-reset-input').value.trim()!==(mode==='everything'?'DELETE':'RESET')){status.textContent='Enter the confirmation word above to continue.';return;}
  clubResetMode=null;
- if(mode==='everything')S.players=[];else S.players.forEach(p=>{p.pts=0;p.roundsPlayed=0;delete p.provisional;});
+ if(mode==='everything')S.players=[];else S.players.forEach(p=>{p.pts=0;p.roundsPlayed=0;p.sessionsPlayed=0;delete p.provisional;});
  S.weeks=[];S.log=[];delete S._clubHistory;clubDetail=null;
  sess={phase:0,day:'wed',weekIdx:-1,sessionLevel:'upper',present:[],courtSizes:[],rotationCount:0,dropouts:[],fillIns:[],r1courts:[],r2courts:[],r1g:{},r1p:{},r1c:{},r2g:{},r2p:{},r2c:{},lastSummary:null,courtNames:[],pickerSearch:'',pickerExpanded:false,swapping:null,addingTo:null,editingCourt:null,r2courtsManual:false,scoresheet:null};
  renderAll();
@@ -4453,7 +4453,8 @@ async function clubSyncInit(){
 const AVG_MODEL='court-average-v1';
 function avgRules(){return {scoringModel:AVG_MODEL,courtBase:[30,25,20,15,10,5],placementBonus:[8,6,4,2,0],fivePlayers:true};}
 function avgEnabled(d=sess){return (d.ruleSnapshot||S.cfg).scoringModel===AVG_MODEL;}
-function avgRating(p){return p.roundsPlayed>0?(p.pts||0)/p.roundsPlayed:0;}
+function avgSessions(p){return p.sessionsPlayed??Math.ceil((p.roundsPlayed||0)/2);}
+function avgRating(p){return avgSessions(p)>0?(p.pts||0)/avgSessions(p):0;}
 function avgCompare(a,b){return avgRating(b)-avgRating(a)||(a.startOrder??S.players.indexOf(a))-(b.startOrder??S.players.indexOf(b))||S.players.indexOf(a)-S.players.indexOf(b);}
 function avgBase(ci,d=sess){const b=(d.ruleSnapshot||S.cfg).courtBase||avgRules().courtBase;return b[Math.min(ci,b.length-1)];}
 function avgCourtLabel(ci,m){return avgEnabled()?avgBase(ci)+' base pts':m.toFixed(2)+'x';}
@@ -4478,12 +4479,12 @@ clubResults=function(d){if(!avgEnabled(d))return avgOldResults(d);avgValidate(d)
  row.requestedTotal=row.total;row.breakdown=parts.join(' | ');row.baseBreakdown=row.breakdown;summary.push(row);ops.push({id:p._clubId,delta:row.total,rounds:row.rounds});}
  return {summary,ops};};
 const avgOldReplay=clubReplay;
-clubReplay=function(){const h=clubHistory();if(S.cfg.scoringModel!==AVG_MODEL)return avgOldReplay();const totals={...h.base},rounds={...(h.roundsBase||{})};
- const ranks=roster=>Object.fromEntries(roster.map((p,i)=>({...p,i})).sort((a,b)=>((rounds[b.id]||0)?(totals[b.id]||0)/rounds[b.id]:0)-((rounds[a.id]||0)?(totals[a.id]||0)/rounds[a.id]:0)||a.i-b.i).map((p,i)=>[p.id,i+1]));
+clubReplay=function(){const h=clubHistory();if(S.cfg.scoringModel!==AVG_MODEL)return avgOldReplay();const totals={...h.base},rounds={...(h.roundsBase||{})},sessions={...(h.sessionsBase||Object.fromEntries(Object.entries(h.roundsBase||{}).map(([id,n])=>[id,Math.ceil(n/2)])))};
+ const ranks=roster=>Object.fromEntries(roster.map((p,i)=>({...p,i})).sort((a,b)=>((sessions[b.id]||0)?(totals[b.id]||0)/sessions[b.id]:0)-((sessions[a.id]||0)?(totals[a.id]||0)/sessions[a.id]:0)||a.i-b.i).map((p,i)=>[p.id,i+1]));
  for(const e of h.events){if(!e.active)continue;if(e.kind==='session')e.beforeRanks=ranks(e.roster);
- for(const op of e.ops){const before=totals[op.id]||0;totals[op.id]=op.set!==undefined?Math.max(0,clubRound(op.set)):Math.max(0,clubRound(before+op.delta));rounds[op.id]=Math.max(0,(rounds[op.id]||0)+(op.rounds||0));const row=e.log?.summary?.find(x=>x.playerId===op.id);if(row){row.beforePoints=before;row.afterPoints=totals[op.id];row.total=clubRound(totals[op.id]-before);row.afterAverage=rounds[op.id]?totals[op.id]/rounds[op.id]:0;}}
+ for(const op of e.ops){if(e.kind==='session'&&op.rounds>0)sessions[op.id]=(sessions[op.id]||0)+1;const before=totals[op.id]||0;totals[op.id]=op.set!==undefined?Math.max(0,clubRound(op.set)):Math.max(0,clubRound(before+op.delta));rounds[op.id]=Math.max(0,(rounds[op.id]||0)+(op.rounds||0));const row=e.log?.summary?.find(x=>x.playerId===op.id);if(row){row.beforePoints=before;row.afterPoints=totals[op.id];row.total=clubRound(totals[op.id]-before);row.afterAverage=sessions[op.id]?totals[op.id]/sessions[op.id]:0;}}
  if(e.kind==='session'){e.afterRanks=ranks(e.roster);e.log.rankSnapshot=Object.fromEntries(e.roster.map(p=>[p.name,e.afterRanks[p.id]]));e.log.rankSnapshotIds={...e.afterRanks};}}
- S.players.forEach(p=>{p.pts=totals[p._clubId]||0;p.roundsPlayed=rounds[p._clubId]||0;});h.last=Object.fromEntries(S.players.map(p=>[p._clubId,p.pts]));S.log=[...h.events.filter(e=>e.active&&e.log).map(e=>clubClone(e.log)).reverse(),...S.log.filter(l=>!l._clubEvent)];if(sess.phase===4&&sess.lastEventId){const e=h.events.find(e=>e.id===sess.lastEventId&&e.active);if(e)sess.lastSummary=clubClone(e.log.summary);}};
+ S.players.forEach(p=>{p.pts=totals[p._clubId]||0;p.roundsPlayed=rounds[p._clubId]||0;p.sessionsPlayed=sessions[p._clubId]||0;});h.last=Object.fromEntries(S.players.map(p=>[p._clubId,p.pts]));S.log=[...h.events.filter(e=>e.active&&e.log).map(e=>clubClone(e.log)).reverse(),...S.log.filter(l=>!l._clubEvent)];if(sess.phase===4&&sess.lastEventId){const e=h.events.find(e=>e.id===sess.lastEventId&&e.active);if(e)sess.lastSummary=clubClone(e.log.summary);}};
 clubSeedOrder=function(present){const eligible=i=>S.players[i].initialSkillPlacement===true&&!S.players[i].roundsPlayed&&clubRating(S.players[i].skillRating)!==null;
  const baseline=present.filter(i=>!eligible(i)).sort((a,b)=>avgCompare(S.players[a],S.players[b]));
  const entries=baseline.map((i,k)=>({i,pos:k}));
@@ -4520,7 +4521,7 @@ const avgOldStartR2=startR2;
 startR2=function(){const courts=sess.r2courtsManual||computeR2Courts(sess.r1courts,sess.r1g,sess.r1p,sess.dropouts,1);if(courts.some(c=>![4,5].includes(c.length))){alert('Adjust round 2 courts to 4 or 5 players before continuing.');return;}sess.rotationCount=1;avgOldStartR2();};
 const avgOldSetScore=setScore;
 setScore=function(key,pi,val,ci,r){if(!avgEnabled())return avgOldSetScore(key,pi,val,ci,r);const n=Number(val);if(sess.savedSheets)delete sess.savedSheets[r+'-'+ci];if(val.trim()==='')delete sess[key][pi];else sess[key][pi]=n;const courts=sess[r+'courts'];for(const [courtIndex,court] of courts.entries())for(const j of court){const el=document.getElementById('prev-'+r+'-'+j)?.querySelector('span:last-child');if(el)el.textContent='+'+avgRoundValue(court,courtIndex,j,r);}save();};
-renderSettings=function(){avgMigrate();document.getElementById('settings-area').innerHTML='<div class="card"><h3>Round-average ladder scoring</h3><p class="club-helper">Two rounds per session. Each game is to 11. Each player partners with everyone on their court.</p><table style="width:100%;margin:16px 0"><thead><tr><th>Court</th><th>Base points per round</th></tr></thead><tbody>'+S.cfg.courtBase.map((b,i)=>'<tr><td style="padding:8px">Court '+(i+1)+(i===5?' and higher':'')+'</td><td>'+b+'</td></tr>').join('')+'</tbody></table><p>Placement bonuses: 1st +8 · 2nd +6 · 3rd +4 · 4th +2 · 5th +0.</p><p class="club-helper">Placement: wins, then total game points. Exact ties use current ladder average, then roster order. First moves up one court; last moves down. Court 1 winner and bottom-court last place stay.</p><p class="club-helper">Ladder rating = total points ÷ rounds played. Absences do not change either number. No attendance bonus, loss deduction, multiplier, or provisional catch-up bonus.</p></div><div class="card"><h3>New season</h3><p class="club-helper">Reset totals and rounds across all four ladders. Players, skill ratings and settings stay. Download a backup first to keep the previous season.</p><button class="btn" onclick="downloadBackup()">Download season backup</button> <button class="btn btn-danger" onclick="avgSeasonReset()">Reset new season</button></div>';};
+renderSettings=function(){avgMigrate();document.getElementById('settings-area').innerHTML='<div class="card"><h3>Round-average ladder scoring</h3><p class="club-helper">Two rounds per session. Each game is to 11. Each player partners with everyone on their court.</p><table style="width:100%;margin:16px 0"><thead><tr><th>Court</th><th>Base points per round</th></tr></thead><tbody>'+S.cfg.courtBase.map((b,i)=>'<tr><td style="padding:8px">Court '+(i+1)+(i===5?' and higher':'')+'</td><td>'+b+'</td></tr>').join('')+'</tbody></table><p>Placement bonuses: 1st +8 · 2nd +6 · 3rd +4 · 4th +2 · 5th +0.</p><p class="club-helper">Placement: wins, then total game points. Exact ties use current ladder average, then roster order. First moves up one court; last moves down. Court 1 winner and bottom-court last place stay.</p><p class="club-helper">Ladder rating = total points ÷ sessions played. Absences do not change either number. No attendance bonus, loss deduction, multiplier, or provisional catch-up bonus.</p></div><div class="card"><h3>New season</h3><p class="club-helper">Reset totals and rounds across all four ladders. Players, skill ratings and settings stay. Download a backup first to keep the previous season.</p><button class="btn" onclick="downloadBackup()">Download season backup</button> <button class="btn btn-danger" onclick="avgSeasonReset()">Reset new season</button></div>';};
 const avgOldRenderAll=renderAll;renderAll=function(){avgMigrate();avgOldRenderAll();};
 function avgSizes(n){for(let courts=Math.floor(n/4);courts>=1;courts--){const extra=n-4*courts;if(extra<=courts)return Array.from({length:courts},(_,i)=>4+(i>=courts-extra?1:0));}return n?[n]:[];}
 autoFillCourtSizes=function(){sess.courtSizes=avgSizes(sess.present.length);save();renderSession();};
